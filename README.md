@@ -6,10 +6,10 @@ In this repository, we have collected all code and scripts necessary to (re-)run
 
 This repository is organized to "work like an `R` package", that is to say we follow all necessary conventions to simulate it as an `R` package via `devtools::load_all()`:
 
-    - Ee make use of a dummy DESCRIPTION file,
-    - All necessary functions are stored in the `R/` folder,
-    - All analysis script are placed in a subfolder of `inst/` (in our case we have opted for `inst/scripts/`), where they are named and numbered by their specific step in the workflow.
-    - Running the analyses will create a `data/` folder, 
+ - We make use of a dummy DESCRIPTION file,
+ - All necessary functions are stored in the `R/` folder,
+ - All analysis script are placed in a subfolder of `inst/` (in our case we have opted for `inst/scripts/`), where they are named and numbered by their specific step in the workflow.
+ - Running the analyses will create a `data/` folder, 
 Note that function documentations are written in `roxygen2` syntax. This means that you can create minimalistic help pages (stored in a `man/` folder) to them by running `roxygen2::roxygenise()` or `devtools::document()` from within this repository.
 
 ## How to use this repository
