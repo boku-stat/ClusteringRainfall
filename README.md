@@ -22,9 +22,9 @@ Note that function documentations are written in `roxygen2` syntax. This means t
 
 ## TODO:
 
- -[ ] Lena: Add note on how to get access to the data. (Will do that once I know how to do that for the lightning data)
- -[ ] Lena: Review all filepaths to new locations
- -[ ] Lena: Review whether I have correctly transferred all necessary functions from `EROSA-Stat`
- -[ ] Lena: Run robustness analyses for different MIT values (finally!), and add these scripts as 101...R - 103...R
- -[ ] Others: Please review whether your scripts and functions have valid `roxygen2` syntax, and `DON'T RUN`-statements for computationally heavy operations.
+ - [ ] Lena: Add note on how to get access to the data. (Will do that once I know how to do that for the lightning data)
+ - [ ] Lena: Review all filepaths to new locations
+ - [ ] Lena: Review whether I have correctly transferred all necessary functions from `EROSA-Stat`
+ - [ ] Lena: Run robustness analyses for different MIT values (finally!), and add these scripts as 101...R - 103...R
+ - [ ] Others: Please review whether your scripts and functions have valid `roxygen2` syntax, and `DON'T RUN`-statements for computationally heavy operations.
  
