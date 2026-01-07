@@ -22,6 +22,7 @@ Note that function documentations are written in `roxygen2` syntax. This means t
 
 ## TODO:
 
+ - [ ] Lena: Write DESCRIPTION
  - [ ] Lena: Add note on how to get access to the data. (Will do that once I know how to do that for the lightning data)
  - [ ] Lena: Review all filepaths to new locations
  - [ ] Lena: Review whether I have correctly transferred all necessary functions from `EROSA-Stat`
