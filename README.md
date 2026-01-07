@@ -18,7 +18,7 @@ Note that function documentations are written in `roxygen2` syntax. This means t
  1. Clone, or download and unzip.
  2. Apply for access to the lightning data, and store it in a `data/` folder within this repository.
  3. Simulate loading this repo as a package by running `devtools::load_all()`. I have added statements explaining which repo functions are used in each script, in case a more base `R` approach via `source()` is preferred.
- 4. Run through the analysis scripts in `inst/scripts` in the order of their numbering, starting from `001_download_station_data.R` up to `006_aggregate_distribution_calc.R`. **Note that a few select analysis steps are computationally heavy.** These steps are marked as such by setting them in a `DON'T RUN` section. Rerun this steps either by decreasing relevant parameters, such as number of repetitions, or run them only on an adequate computational setup with sufficient cores and GPU available.
+ 4. Run through the analysis scripts in `inst/scripts` in the order of their numbering, starting from `001_download_station_data.R` up to `006_aggregate_distribution_calc.R`. **Note that a few select analysis steps are computationally heavy.** These steps are marked as such by setting them in a `DON'T RUN` section. Rerun these steps either by decreasing relevant parameters, such as number of repetitions, or run them only on an adequate computational setup with sufficient cores and GPU available.
  5. The robustness analyses, using different Minimum Interevent Time levels are stored in `101_robustness_MIT6.Rmd` to `103_robustness_MIT24.Rmd`.
 
 ## TODO:
