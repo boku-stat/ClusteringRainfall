@@ -3,5 +3,6 @@
 .Rhistory
 .RData
 .Ruserdata
+.Rbuildignore
 data/
 man/
