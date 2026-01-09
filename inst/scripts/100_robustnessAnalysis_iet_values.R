@@ -335,8 +335,7 @@ step5_clusterwise_regression <- function(iet) {
   }
 }
 
-# Usage:
-step5_clusterwise_regression(iet=max(IET_VALUES))
+# Usage: step5_clusterwise_regression(iet=max(IET_VALUES))
 
 ################################################################################
 # STEP 6: AGGREGATE DISTRIBUTION FIT, AND REPORT GENERATION
@@ -377,8 +376,7 @@ step6_generate_report <- function(iet) {
   })
 }
 
-#Usage:
-step6_generate_report(iet=4) #still not yet fully tested
+#Usage: step6_generate_report(iet=4) #still not yet fully tested
 
 ################################################################################
 # MAIN EXECUTION
@@ -388,7 +386,8 @@ main <- function(step1=TRUE,
                  step2=TRUE,
                  step3=TRUE,
                  step4=TRUE,
-                 step5=TRUE) {
+                 step5=TRUE,
+                 step6=TRUE) {
   
   if (step1) {
     step1_download_station_data(ids=STATIONS)
@@ -430,25 +429,6 @@ main <- function(step1=TRUE,
     
   }
   
-  # Steps 2-4: Run for each IET value
-  for (iet in IET_VALUES) {
-    message(sprintf("\n################################################################################"))
-    message(sprintf("######################### PROCESSING IET = %d #################################", iet))
-    message(sprintf("################################################################################\n"))
-    
-    if (run_step2) {
-      step2_partitioning_clustering(iet)
-    }
-    
-    if (run_step3) {
-      step3_clusterwise_regression(iet, run_bootstrap = run_bootstrap)
-    }
-    
-    if (run_step4) {
-      step4_generate_report(iet)
-    }
-  }
-  
 }
 
 ################################################################################
@@ -465,3 +445,11 @@ main(
   step6 = TRUE # generate diagnostic reports
 )
 #TODO: Fix error in FAMD plots, reports prolly won't run through anyways, uncheck this "nona-based" selection
+
+
+#nona-Monitoring:
+
+# zettlchen@nona04:~/EROSA_robust$ R CMD BATCH inst/scripts/100_robustnessAnalysis_iet_values.R &
+# [1] 1312396
+# Sys.time()
+# [1] "2026-01-09 23:03:18 CET"
