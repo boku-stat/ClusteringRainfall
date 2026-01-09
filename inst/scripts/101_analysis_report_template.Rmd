@@ -1,0 +1,342 @@
+---
+title: "Precipitation Event Clustering: Robustness Analysis for different Minimum Interevent Times"
+subtitle: "Minimum Interevent Time (IET) = `r params$iet` hours"
+author: "Lena Ortega Menjivar"
+date: "`r format(Sys.Date(), '%B %d, %Y')`"
+output:
+  pdf_document:
+    toc: true
+    fig_width: 10
+    fig_height: 6
+params:
+  iet: 6
+  stations: !r c(30, 171)
+  path_results: "data/clusres/"
+  path_dat: "data/events_combined/"
+  filt: 0
+  ks: !r 2:8
+  clusvars: "magnitude"
+  regvars: "magnitude"
+  chosen_ks: !r NULL
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  echo = TRUE,
+  message = FALSE,
+  warning = FALSE,
+  fig.align = 'center',
+  dpi = 300
+)
+
+# Load required libraries
+library(rmarkdown)
+library(tidyverse)
+library(ggpubr)
+library(flexclust)
+library(flexmix)
+library(FactoMineR)
+library(philentropy)
+library(patchwork) #
+library(knitr)
+
+theme_set(theme_minimal(base_size = 12)) #ggplot theme
+```
+
+```{r load-data, include=FALSE}
+# Parameters
+iet <- params$iet
+stations <- params$stations
+path_results <- paste0("../../", params$path_results) #relative to .Rnw file
+path_dat <- paste0("../../", params$path_dat)
+filt <- params$filt
+ks <- params$ks
+clusvars <- params$clusvars
+regvars <- params$regvars
+chosen_ks <- params$chosen_ks
+
+# Load data
+dat <- sprintf("%smodel_input_events_iet_%dh_%d.RDS",
+        path_dat, iet, stations) |> 
+  sapply(readRDS, simplify=FALSE) %>%
+  setNames(gsub('[^0-9]', '', names(.))) %>%
+  setNames(gsub('4', '', names(.))) |> 
+  lapply(\(df) {
+  mutate(df,
+         flash = as.logical(flash),
+         across(all_of(clusvars[1:4]), log),
+         across(all_of(clusvars[1:5]), ~(. - min(.))/diff(range(.)))) |> 
+    rename(precipitation=rr)
+    })
+
+# Load clustering results
+part <- new.env() #already contains stability analysis
+mod <- new.env()
+modStab <- new.env()
+
+res <- sprintf("%spart_iet_%d_station_%d.RDA",
+               path_results, iet, stations)
+for(i in res) load(i, envir=part)
+parts <- ls(envir=part)
+
+res <- sprintf("%smod_iet_%d_filt_%g_station_%d.RDA",
+               path_results, iet, filt, stations)
+for(i in res) load(i, envir=mod)
+mods <- ls(envir=mod)
+
+res <- sprintf("%smod_iet_%d_filt_%g_station_%d_stabAn.RDA",
+               path_results, iet, filt, stations)
+for(i in res) load(i, envir=modStab)
+modStabs <- ls(envir=modStab)
+```
+
+# Executive Summary
+
+This report presents the results of precipitation event clustering and clusterwise regression analysis, and then consecutive cluster-aggregate theoretical distribution fitting for **IET = `r iet` hours**.
+
+**Analysis Configuration:**
+
+- **Inter-Event Time (IET):** `r iet` hours
+- **Stations Analyzed:** `r paste(stations, collapse = ", ")`
+- **Number of Clusters (k) tested:** `r paste(ks, collapse = ", ")`
+- **Filter Values:** `r paste(filt, collapse= ", ")`
+- **Date Generated:** `r format(Sys.Date(), '%B %d, %Y')`
+
+---
+
+# 1. Clustering Stability Analysis
+
+## 1.1 Adjusted Rand Index (ARI) - Global Stability of clustering solutions
+
+```{r ari-global-part, fig.height=8}
+lapply(parts, \(mdl) {
+  partres <- part[[mdl]]
+  stn <- str_extract(mdl, "\\d+$")
+  partres$globalStability |> 
+    ggplot(aes(x=k, y=ARI)) +
+    geom_boxplot() +
+    labs(title=sprintf("station: %s", stn))
+}) |> ggarrange(plotlist=_) |> 
+  annotate_figure(top="Partitioning clustering")
+```
+```{r ari-global-mod, fig.height=8}
+lapply(modStabs, \(mdl) {
+  regres <- modStab[[mdl]]
+  stn <- str_extract(mdl, "\\d+_stabAn$") |> 
+    str_extract("\\d+")
+  regres$rand |> 
+    as.data.frame() |> 
+    pivot_longer(everything(),
+                 names_to = "k",
+                 values_to = "ARI") |> 
+    ggplot(aes(x=k, y=ARI)) +
+    geom_boxplot() +
+    labs(title=sprintf("station: %s", stn))
+}) |> ggarrange(plotlist=_) |> 
+  annotate_figure(top="Clusterwise regression")
+rm(list=ls(pattern="modStab"))
+```
+
+## 1.2 Adjusted Rand Index (ARI) - Segment-level Stability of clustering solutions
+
+Segment-level stability analysis examines the stability of each segment. Only run for partitioning clustering. 
+
+```{r ari-segment, fig.height=10}
+lapply(parts, \(mdl) {
+  partres <- part[[mdl]]
+  stn <- str_extract(mdl, "\\d+$")
+  partres$segLevelStability |> 
+    ggplot(aes(x=segment, y=ARI)) +
+    geom_boxplot() +
+    facet_wrap(~k, scales="free_x") +
+    labs(title=sprintf("station: %s", stn))
+}) |> ggarrange(plotlist=_) |> 
+  annotate_figure(top="Partitioning clustering")
+
+```
+
+**CAUTION, The optimal k is chosen visually based on the above ARI plots. For the automatized reports, the ks chosen for IET=4h are chosen as a starting default, and will possibly have to be adjusted manually.**
+
+---
+
+# 2. Visualization of clusters
+
+## 2.1 FAMD plots
+
+```{r famd-plots, fig.height=10}
+
+if(is.null(chosen_ks)) {
+  chosen_ks <- c(3, 3, 4, 2) |> as.character()
+  names(chosen_ks) <- rep(c("part", "mod"), each=2) |> 
+    paste0(stations)
+}
+
+part <- sapply(parts, \(mdl) {
+  partres <- part[[mdl]]$stepClustResult
+  stn <- str_extract(mdl, "\\d+$")
+  clus_short <- .get_clusters(partres,
+                              chosen_ks[paste0("part", stn)])
+  tms <- dat[[stn]]$precipitation |> 
+    sapply(\(x) sum(x>filt))
+  clus_long <- rep(clus_short, times=tms)
+  
+  list(clus_short=clus_short,
+       clus_long=clus_long)
+  
+}, simplify=FALSE)
+
+mod <- sapply(mods, \(mdl) {
+
+  regres <- mod[[mdl]]
+  stn <- str_extract(mdl, "\\d+$")
+  kstar <- chosen_ks[paste0("mod", stn)]
+  mod <- getModel(regres, kstar)
+  clus_short <- .get_clusters(regres, kstar)
+  clus_long <- clusters(mod) #same as .get_clusters(regres, per_group=FALSE)
+  
+  list(mod=mod,
+       clus_short=clus_short,
+       clus_long=clus_long)
+  
+}, simplify=FALSE)
+
+clusses <- c(part, mod)
+allmod <- c(parts, mods)
+
+FAMD_DIMS <- list(x=1, y=2:4) #dims passt was nicht
+
+lapply(allmod, \(mdl) {
+  stn <- str_extract(mdl, "\\d+$")
+  mod_type <- str_split_i(mdl, "_", 1)
+  kstar <- chosen_ks[paste0(mod_type, stn)]
+  plt_famd(dat[[stn]][clusvars],
+           clusses[[mdl]]$clus_short,
+           dims=FAMD_DIMS,
+           title=sprintf("Station: %s; Mod.Type: %s; k=%s", stn, mod_type, kstar))
+})  %>% ggarrange(plotlist=.,
+                 legend.grob=get_legend(.[[which.max(chosen_ks)]] +
+                                          theme(legend.position = 'bottom')),
+                 legend='bottom')
+
+```
+
+
+# 2.2. Partial Dependence Plots (PDP)
+
+Marginal effect of each (main effect of a) predictor on the response variable, applied only to clusterwise regression results.
+
+```{r pdp-plots, fig.height=12}
+
+lapply(mods, \(mdl) {
+  stn <- str_extract(mdl, "\\d+$")
+  mod_type <- "mod"
+  kstar <- chosen_ks[paste0(mod_type, stn)]
+  plt_dpd_flexmix(mod[[mdl]]$mod,
+                  setdiff(regvars, "flash"),
+                  fac_var="flash",
+                  title=sprintf("Station: %s; Mod.Type: %s; k=%s", stn, mod_type, kstar))
+}) %>% ggarrange(plotlist=., ncol=1,
+                 legend.grob=get_legend(.[[which.max(chosen_ks[grep("mod", names(chosen_ks))])]] +
+                                          theme(legend.position = 'bottom')),
+                 legend='bottom')
+
+```
+
+
+## 2.3 Clusterwise Empirical Cumulative Distribution Functions (ECDF)
+
+```{r ecdf-plots, fig.height=10}
+
+lapply(stations, \(stn) {
+
+  mdls <- grep(stn, names(clusses), value=TRUE)
+  lbls <- names(clusses[mdls]) |>
+    sapply(str_split_i, "_", 1) |> 
+    sapply(\(x) paste("Type:", x))
+  dat[[as.character(stn)]] |> 
+    rename(rr=precipitation) |>
+    plt_ecdf(clus_obj = lapply(clusses[mdls], `[[`, "clus_short"),
+           title=paste("Station:", stn),
+           subtitle=lbls)
+}) |> ggarrange(plotlist=_, ncol=1,
+               common.legend=TRUE,
+               legend='bottom')
+
+```
+
+---
+
+# 3. Cluster-Aggregate distribution fit and comparison
+
+# 2.1 Kullback-Leibler Divergence Analysis
+
+
+```{r kl-divergence, results='asis'}
+
+LENGTH_OUT <- 1000
+
+KL <- sapply(allmod, \(mdl) {
+  
+  stn <- str_extract(mdl, "\\d+$")
+  rr <- dat[[stn]]$precipitation
+  
+  pdf_theoretical <- 
+    aggregate_dist_calc(rr, clusses[[mdl]]$clus_long,
+                        filt=filt,
+                        length_out = LENGTH_OUT,
+                        type='PDF')
+  rr <- unlist(rr)
+  rr <- rr[rr>filt]
+  pdf_empirical <- density(rr,
+                           from = max(filt, 1e-3),
+                           to = max(rr),
+                           n = LENGTH_OUT)$y
+  
+  c(
+    simple_Gamma=.get_KL(pdf_empirical, pdf_theoretical$simple_Gamma),
+    aggregated_Gamma=.get_KL(pdf_empirical, pdf_theoretical$aggregated_Gamma)
+  )
+})
+
+KL |> t() |> 
+  kable()
+
+```
+
+
+# 3.2 Visual CDF Comparison
+
+These plots compare the fits of the simple theoretical distribution and the clusterwise-aggregate theoretical distribution to the empirical CDF of the precipitation time series.
+
+
+```{r cdf-comparison, fig.height=12}
+
+lapply(stations, \(stn) {
+
+  mdls <- grep(stn, names(clusses), value=TRUE)
+  lbls <- names(clusses[mdls]) |>
+    sapply(str_split_i, "_", 1) |> 
+    sapply(\(x) paste("Type:", x))
+  dat[[as.character(stn)]] |> 
+    rename(rr=precipitation) |>
+    plt_cdf_comp(clus_vec = lapply(clusses[mdls], `[[`, "clus_short"),
+                 filt=filt,
+                 title=paste("Station:", stn),
+                 subtitle=lbls)
+}) |> ggarrange(plotlist=_, ncol=1,
+               common.legend=TRUE,
+               legend='bottom')
+
+```
+
+# Session Information
+
+```{r session-info}
+sessionInfo()
+```
+
+---
+
+**Report generated:** `r Sys.time()`  
+**IET value:** `r iet` hours  
+**Stations:** `r paste(stations, collapse = ", ")`

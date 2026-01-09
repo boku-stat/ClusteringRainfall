@@ -1,6 +1,17 @@
 #rewriting it to bootstrap events - should be much faster too
 #21.07.25
 
+#rewriting flexclust:::MClapply so that it'll handle *actually multiple*
+#cores, and not just two (default value of parallel::mclapply)
+MClapply <- function (X, FUN, multicore = TRUE, mc.cores=2, ...) 
+{
+  if (inherits(multicore, "cluster")) 
+    parLapply(multicore, X, FUN)
+  else if (multicore) 
+    mclapply(X, FUN, mc.cores=mc.cores, ...)
+  else lapply(X, FUN, ...)
+}
+
 bootEventmix <- function(x, k, formula=x~1, model=FLXMCnorm1(), filter=0,
                          nboot = 100, correct = TRUE, seed = NULL, multicore = TRUE,
                          mc.cores = 2, verbose = FALSE, ...) {

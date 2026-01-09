@@ -30,8 +30,12 @@ if(!dir.exists(path_out))
 }
 
 iet <- c(3,4,6,12,18,24)
+#--DON'T RUN----------------
+# this section was run on a HPC, using roughly 30 cores, taking about a week.
+# Run this full setup only on an appropriate computing setup.
 for(i in iet)
 {
   lapply(fl, get_events, path_out = path_out, th_init = 0.2, nh = i, 
          th_sum = 1.27)
 }
+#--------------------------

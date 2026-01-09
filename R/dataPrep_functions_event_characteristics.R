@@ -1,6 +1,6 @@
 get_event_characteristics <- function(start, end, x) 
 {
-  xx <- x %>% filter(between(date, start, end)) 
+  xx <- x |> filter(between(date, start, end)) 
   severity <- sum(xx$rr)
   magnitude <- max(xx$rr)
   duration <- as.integer(difftime(end, start, units = "mins")) + 10
@@ -14,7 +14,7 @@ get_event_characteristics <- function(start, end, x)
 
 get_max_hourly_precip <- function(start, end, x, th)
 {
-  xx <- x %>% filter(between(date, start, end)) 
+  xx <- x |> filter(between(date, start, end)) 
   d <- as.integer(difftime(end, start, units = "mins")) + 10
   if(d <= 60)
   {
@@ -27,12 +27,13 @@ get_max_hourly_precip <- function(start, end, x, th)
   return(ifelse(hourly_max >= th, 1, 0))
 }
 
-get_events <- function(fname, path_out, th_init = 0.1, nh = 4, th_sum = 1.27)
+get_events <- function(fname, df, path_out,
+                       th_init = 0.1, nh = 4, th_sum = 1.27)
 {
   x <- read_csv(fname, show_col_types = FALSE)
   x <- left_join(df, x, by = c("date" = "time"))
-  x <- x %>% mutate(month = month(date))
-  x <- x %>% filter(between(month, 4, 10))
+  x <- x |> mutate(month = month(date))
+  x <- x |> filter(between(month, 4, 10))
   nna <- sum(is.na(x$rr))
   d <- dim(df)[1]
   if(nna > d*0.1)
@@ -41,7 +42,7 @@ get_events <- function(fname, path_out, th_init = 0.1, nh = 4, th_sum = 1.27)
   }
   else
   {
-    x <- x %>% mutate(ev = ifelse(rr < th_init, 0, 1),
+    x <- x |> mutate(ev = ifelse(rr < th_init, 0, 1),
                       lag_ev = lag(ev,1, default = 0))
     l <- dim(x)[1]
     x$event <- NA
@@ -57,25 +58,25 @@ get_events <- function(fname, path_out, th_init = 0.1, nh = 4, th_sum = 1.27)
     {
       x$event[i] <- ifelse(x$ev[i] == 0, 0, ifelse(x$lag_ev[i] == 0, max(x$event, na.rm = TRUE) + 1, x$event[i-1]))
     }
-    ev <- x %>% group_by(event) %>% summarize(start = first(date), end = last(date)) %>% ungroup() %>% 
+    ev <- x |> group_by(event) |> summarize(start = first(date), end = last(date)) |> ungroup() |> 
       filter(event != 0)
-    ev <- ev %>% mutate(lag_end = lag(end, default = ev$end[1]))
-    ev <- ev %>% mutate(int_period = as.integer(difftime(start, lag_end, units = "mins")))
+    ev <- ev |> mutate(lag_end = lag(end, default = ev$end[1]))
+    ev <- ev |> mutate(int_period = as.integer(difftime(start, lag_end, units = "mins")))
     le <- dim(ev)[1]
-    ev <- ev %>% mutate(grp_ev = 1)
+    ev <- ev |> mutate(grp_ev = 1)
     for(i in 2:le)
     {
       ev$grp_ev[i] <- ifelse(ev$int_period[i] <= nh*60, ev$grp_ev[i-1], ev$grp_ev[i-1] + 1) 
     }
-    out <- ev %>% group_by(grp_ev) %>% summarize(start = min(start), end = max(end)) %>% rename(id = grp_ev)
-    out <- out %>% ungroup()
+    out <- ev |> group_by(grp_ev) |> summarize(start = min(start), end = max(end)) |> rename(id = grp_ev)
+    out <- out |> ungroup()
     print("All events are picked")
     # Select only events that have an hourly precipitation sum larger than 1.27
-    out <- out %>% mutate(th_filter = pmap_int(.l = list(start, end), .f = function(start, end)
+    out <- out |> mutate(th_filter = pmap_int(.l = list(start, end), .f = function(start, end)
       get_max_hourly_precip(start = start, end = end, x = x, th = th_sum)))
-    out <- out %>% filter(th_filter == 1) %>% dplyr::select(!all_of(c("th_filter")))
+    out <- out |> filter(th_filter == 1) |> dplyr::select(!all_of(c("th_filter")))
     print("Events over threshold are filtered")
-    out <- out %>% mutate(ev_char = pmap(.l = list(start, end), .f = function(start, end) 
+    out <- out |> mutate(ev_char = pmap(.l = list(start, end), .f = function(start, end) 
       get_event_characteristics(start = start, end = end, x = x)))
     print("All characteristics are calculated")
     out <- unnest(out, ev_char)
@@ -84,4 +85,36 @@ get_events <- function(fname, path_out, th_init = 0.1, nh = 4, th_sum = 1.27)
     print(fname_out)
     write_csv(out, fname_out)  
   }
+}
+
+save_flash <- function(flash_data, time_data,
+                       id_sel, path_out)
+{
+  fname_out <- paste0(path_out, "flash_", id_sel, ".csv")
+  xsel <- flash_data |> filter(id == id_sel)
+  xsel <- xsel |> group_by(dt) |> summarize(flash = ifelse(sum(flash) > 0, 1, 0))
+  out <- xsel[c("flash", "dt")] |> rename(date = dt)
+  out <- left_join(time_data, out)
+  out <- out |> mutate(flash = ifelse(is.na(flash), 0, flash))
+  write_csv(out, fname_out)
+}
+
+combine_data <- function(fname_event, path_out,
+                         fname_flash, fname_precip)
+{
+  bn <- basename(fname_event)
+  id <- gsub(".csv", "", last(strsplit(bn, split = "_")[[1]]))
+  ev <- read_csv(fname_event, show_col_types = FALSE)
+  fname_raw <- grep(id, fname_precip, value = TRUE)
+  x <- read_csv(fname_raw, show_col_types = FALSE)
+  fname_flash <- grep(id, fname_flash, value = TRUE)
+  flash <- read_csv(fname_flash, show_col_types = FALSE)
+  # Add raw precipitation data to each event
+  ev <- ev |> mutate(rr = pmap(.l = list(start, end), .f = function(start, end)
+    get_precip(start = start, end = end, df = x)))
+  ev <- ev  |>  mutate(flash = pmap_int(.l = list(start, end), .f = function(start, end) 
+    get_flash_data(start = start, end = end, flash = flash)))
+  fname_out <- paste0(path_out, "model_input_", bn)
+  fname_out <- gsub(".csv", ".RDS", fname_out)
+  saveRDS(ev, fname_out)
 }

@@ -118,7 +118,7 @@ if(FALSE) {
 
 #' Plot Partial Dependency Plots of a `flexmix` clusterwise regression object: Step 2: plot
 #' @param model object of class `flexmix` that has been calculated with covariates (i.e. clusterwise regression)
-#' @param eval_vars vector of the names of the variables who shall be evaluated, as effect and/or mean variable
+#' @param eval_vars vector of the names of the variables which shall be evaluated, as effect and/or mean variable
 #' @param effect_vars vector of the names of the variables whose effect shall be investigated. Default: equal to `eval_vars`.
 #' @param effect_type_main Logical. Shall the main effect of `effect_vars` be investigated? (Default=TRUE. FALSE --> interaction effects are investigated)
 #' @param fac_var name of the factor covariate whose influence shall also be visualized (character variable, length=1)

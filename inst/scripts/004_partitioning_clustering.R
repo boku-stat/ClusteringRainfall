@@ -30,7 +30,7 @@ set.seed(start_seed)
 events <- paste0(pth_prec,
                  'model_input_events_iet_', iet,
                  'h_*.RDS') |> 
-  Sys.glob() |> 
+  Sys.glob() %>% 
   grep(paste(stations, collapse='|'), x=_, value=TRUE) |> 
   sapply(readRDS, simplify=FALSE) %>%
   setNames(gsub('[^0-9]', '', names(.))) %>%

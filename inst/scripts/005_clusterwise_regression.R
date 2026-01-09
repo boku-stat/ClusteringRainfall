@@ -103,6 +103,7 @@ for(i in 1:nrow(model_options)) {
        file=paste0(pth_out, varnames[i],
                    '.RDA'))
 }
+#-----------------------
 
 ################################################################################
 #-----------------Stability analysis: visualize results-------------------------
