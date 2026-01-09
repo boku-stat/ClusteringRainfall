@@ -1,0 +1,55 @@
+Package: ClusteringRainfall
+Type: Package
+Title: Repository containing Reproduction Code for "Improving stochastic rainfall models through event classification" by Ortega Menjivar et al. (2026+)
+Version: 1.0
+Date: 2026-01-09
+Authors@R: c(
+    person("Lena", "Ortega Menjivar", 
+           email = "lena.ortega-menjivar@boku.ac.at", 
+           role = c("aut", "cre"),
+           comment = c(ORCID = "0000-0001-5785-4021")),
+    person("Nur Banu", "Özcelik", 
+           role = "aut",
+           comment = c(ORCID = "0000-0002-5344-8146")),
+    person("Johannes", "Laimighofer", 
+           role = "aut",
+           comment = c(ORCID = "0000-0002-9926-0990")),
+    person("Svenja", "Fischer", 
+           role = "aut",
+           comment = c(ORCID = "0000-0002-6118-0223")),
+    person("Gregor", "Laaha", 
+           role = "aut",
+           comment = c(ORCID = "0000-0002-6793-9640"))
+    )
+Maintainer: Lena Ortega Menjivar <lena.ortega-menjivar@boku.ac.at>
+Description: Reproduction code and analysis pipeline for improving theoretical distribution fit to precipitation time series by separating the time series into rainfall events, enriching them with lightning occurence data, clustering the rainfall events via two comparative approaches, and fitting and aggregating clusterwise theoretical Gamma distributions. Note that this repository has not been tested as a "full R package" but rather only for simulated use via `devtools::load_all()`.
+License: GPL-3
+Encoding: UTF-8
+Depends:
+  R (>=4.1.0)
+Imports:
+    dplyr (>= 1.0.0),
+    tidyr (>= 1.0.0),
+    purrr (>= 0.3.0),
+    readr (>= 2.0.0),
+    lubridate (>= 1.7.0),
+    ggplot2 (>= 3.3.0),
+    sf (>= 1.0.0),
+    units (>= 0.7.0),
+    flexclust (>= 1.4.0),
+    flexmix (>= 2.3.0),
+    parallel
+Suggests:
+    tidync (>= 0.2.0),
+    rmarkdown (>= 2.0),
+    knitr (>= 1.30),
+    kableExtra (>= 1.3.0),
+    FactoMineR (>= 2.4),
+    factoextra (>= 1.0.7),
+    pdp (>= 0.7.0),
+    patchwork (>= 1.1.0),
+    testthat (>= 3.0.0)
+VignetteBuilder: knitr
+RoxygenNote: 7.2.0
+URL: https://github.com/boku-stat/ClusteringRainfall
+BugReports: https://github.com/boku-stat/ClusteringRainfall/issues

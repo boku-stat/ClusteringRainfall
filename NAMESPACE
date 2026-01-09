@@ -1,0 +1,8 @@
+export("aggregate_dist_calc", "bootEventmix", "do_stabAn",
+       "extract_clusters", "extract_MixAll_modspecs",
+       "get_clusterMeans", "get_csv", "get_de", "get_estimate",
+       "get_event_characteristics", "get_events", "get_flash_data",
+       "get_max_hourly_precip", "get_modnames", "get_precip",
+       "get_prob_cluster", "get_sample", "get_url", "plt_cdf_comp",
+       "plt_dpd_flexmix", "plt_ecdf", "plt_famd", "silchoice",
+       "summarise_proportions")
