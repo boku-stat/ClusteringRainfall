@@ -211,8 +211,7 @@ step4_partitioning_clustering <- function(iet) {
     Sys.glob() %>% 
     grep(paste(STATIONS, collapse='|'), x = ., value = TRUE) |> 
     sapply(readRDS, simplify = FALSE) %>%
-    setNames(gsub('[^0-9]', '', names(.))) %>%
-    setNames(gsub(as.character(iet), '', names(.)))
+    setNames(gsub('.*_(\\d+)\\.RDS$', '\\1', names(.)))
   
   if (length(events) == 0) {
     warning(sprintf("No event data found for IET=%d", iet))
@@ -267,8 +266,7 @@ step5_clusterwise_regression <- function(iet) {
     Sys.glob() %>% 
     grep(paste(STATIONS, collapse='|'), x = ., value = TRUE) |> 
     sapply(readRDS, simplify = FALSE) %>%
-    setNames(gsub('[^0-9]', '', names(.))) %>%
-    setNames(gsub(as.character(iet), '', names(.)))
+    setNames(gsub('.*_(\\d+)\\.RDS$', '\\1', names(.)))
   
   if (length(events) == 0) {
     warning(sprintf("No event data found for IET=%d", iet))
