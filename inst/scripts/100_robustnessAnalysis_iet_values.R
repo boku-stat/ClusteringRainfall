@@ -26,6 +26,7 @@ library(flexclust)
 library(flexmix)
 library(parallel)
 library(rmarkdown)
+library(philentropy)
 devtools::load_all() #alternatively, source(...) #TODO: add relevant function script paths here
 
 ################################################################################
@@ -33,7 +34,8 @@ devtools::load_all() #alternatively, source(...) #TODO: add relevant function sc
 ################################################################################
 
 # IET values for robustness analysis
-IET_VALUES <- c(3, 6, 12, 18, 24)
+#IET_VALUES <- c(3, 6, 12, 18, 24)
+IET_VALUES <- c(12,18,24) #for attempt 2, when the process broke for the report in 3 and 6
 # Station selection
 STATIONS <- c(30, 171)
 # Time series range
@@ -435,19 +437,27 @@ main <- function(step1=TRUE,
 # Run the selected pipeline steps
 
 main(
-  step1 = FALSE, # download precipiation time series data
+  step1 = FALSE, # download precipitation time series data
   step2 = FALSE, # derive events and event characteristics
   step3 = FALSE, # combine event and flash data
   step4 = TRUE, # partitioning clustering (+stability analysis)
   step5 = TRUE, # clusterwise regression (+stability analysis)
-  step6 = TRUE # generate diagnostic reports
+  step6 = FALSE # generate diagnostic reports
 )
 #TODO: Fix error in FAMD plots, reports prolly won't run through anyways, uncheck this "nona-based" selection
-
+#right now: run steps 4+5 for IET 12 and 24 (which are when the process broke)
+#then restart for all iet with step6
 
 #nona-Monitoring:
 
 # zettlchen@nona04:~/EROSA_robust$ R CMD BATCH inst/scripts/100_robustnessAnalysis_iet_values.R &
-# [1] 1312396
-# Sys.time()
-# [1] "2026-01-09 23:03:18 CET"
+#   [1] 2464802
+# zettlchen@nona04:~/EROSA_robust$ timedatectl
+# Local time: Mon 2026-01-12 09:32:24 CET
+# Universal time: Mon 2026-01-12 08:32:24 UTC
+# RTC time: Mon 2026-01-12 08:32:24
+# Time zone: Europe/Vienna (CET, +0100)
+# System clock synchronized: yes
+# NTP service: active
+# RTC in local TZ: no
+
