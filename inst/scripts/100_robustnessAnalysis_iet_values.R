@@ -37,7 +37,8 @@ devtools::load_all() #alternatively, source(...) #TODO: add relevant function sc
 #IET_VALUES <- c(3, 6, 12, 18, 24)
 IET_VALUES <- c(12,18,24) #for attempt 2, when the process broke for the report in 3 and 6
 # Station selection
-STATIONS <- c(30, 171)
+#STATIONS <- c(30, 171)
+STATIONS <- 171 #for attempt 3, 12h broke for Dornbirn
 # Time series range
 RANGE <- list()
 RANGE$START <- ymd_hms("2010-01-01 00:00:00")
@@ -65,6 +66,12 @@ FILTER_VALUES <- 0 #TODO (note to self): Only ran for filt0
 N_CORES <- max(1, floor(parallel::detectCores() * 0.8))
 N_BOOTSTRAP <- 100  # reduce for faster testing, 100+ for production
 VERBOSE <- TRUE
+MClapply_wrapper <- function(X, FUN, ..., multicore=TRUE) {
+  ClusteringRainfall:::MClapply(X, FUN, ...,
+                                multicore=multicore,
+                                mc.cores=N_CORES)
+}
+assignInNamespace("MClapply", MClapply_wrapper, ns="flexclust") ##overriding flexclust's default of 2 cores
 # File paths
 PATHS <- list()
 PATHS$STATION_METADATA <- "data/selected_stations_metadata.csv"
@@ -449,7 +456,6 @@ main(
 #then restart for all iet with step6
 
 #nona-Monitoring:
-
 #zettlchen@nona04:~/EROSA_robust$ R CMD BATCH inst/scripts/100_robustnessAnalysis_iet_values.R &
 #[1] 3955544
 #zettlchen@nona04:~/EROSA_robust$ timedatectl
@@ -460,3 +466,4 @@ main(
 #System clock synchronized: yes
 #              NTP service: active
 #          RTC in local TZ: no
+

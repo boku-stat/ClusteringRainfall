@@ -12,6 +12,7 @@ MClapply <- function (X, FUN, multicore = TRUE, mc.cores=2, ...)
   else lapply(X, FUN, ...)
 }
 
+#bootstrapping of flexmix at group(=event) level
 bootEventmix <- function(x, k, formula=x~1, model=FLXMCnorm1(), filter=0,
                          nboot = 100, correct = TRUE, seed = NULL, multicore = TRUE,
                          mc.cores = 2, verbose = FALSE, ...) {
