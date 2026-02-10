@@ -6,16 +6,15 @@
 #' @param scale_factor Factor by which the visual representation of the original variables will be scaled
 #' @param title optional plot title
 #' @param subtitle optional plot subtitle
-plt_famd <- function(dat, clusters, dims=list(x=1, y=c(2,3,4)),
+plt_famd <- function(dat, clusters, dims=list(x=2:4, y=1),
                      scale_factor=5, title=NULL, subtitle=NULL){
-  
   # Factorize flash if that hasn't been done yet
   if(!is.factor(dat$flash)) dat$flash <- factor(dat$flash)
   dim <- lapply(dims, \(d) sprintf("Dim.%d", d))
   famd_result <- FactoMineR::FAMD(dat, graph = FALSE)
   
   # Extract coordinates for all dimensions, and attach cluster and flash info
-  ind_coords <- famd_result$ind$coord |> 
+  ind_coords <- famd_result$ind$coord |>
     as_tibble() |> 
     mutate(cluster = factor(clusters),
            flash = dat$flash) |> 
@@ -24,7 +23,7 @@ plt_famd <- function(dat, clusters, dims=list(x=1, y=c(2,3,4)),
     pivot_longer(all_of(dim$y), names_to = "y",
                  values_to = "values_y")
   # Extract variable coordinates and scale them
-  var_coords <- famd_result$var$coord |> 
+  var_coords <- famd_result$var$coord |>
     as_tibble() |> 
     mutate(variable = rownames(famd_result$var$coord)) |> 
     mutate(across(where(is.numeric), ~ .x * scale_factor)) |> 
@@ -41,23 +40,24 @@ plt_famd <- function(dat, clusters, dims=list(x=1, y=c(2,3,4)),
     sprintf("%s (%g%%)", dim[[d]], labs[[d]]) |> 
       setNames(dim[[d]])
   }, simplify = FALSE)
+
+    ggplot() +
+      geom_point(data = ind_coords,
+                 aes(x=values_x, y=values_y,
+                     color=cluster, shape=flash), size=2) +
+      geom_segment(data = var_coords, x=0, y=0,
+                   aes(xend = values_x, yend = values_y),
+                   arrow = arrow(length = unit(0.2, "cm")), color = "blue") +
+      geom_text(data = var_coords, 
+                aes(x = values_x, y = values_y, label = variable),
+                color = "blue", vjust = 1.5) +
+      labs(x=NULL, y=NULL, title=title, subtitle=subtitle) +
+      facet_grid(y~x, scales="free",
+                 labeller=labeller(x=labs$x, y=labs$y),
+                 switch="both") +
+      theme_minimal() +
+      theme(strip.placement = "outside")
   
-  ggplot() +
-    geom_point(data = ind_coords,
-               aes(x=values_x, y=values_y,
-                   color=cluster, shape=flash), size=2) +
-    geom_segment(data = var_coords, x=0, y=0,
-                 aes(xend = values_x, yend = values_y),
-                 arrow = arrow(length = unit(0.2, "cm")), color = "blue") +
-    geom_text(data = var_coords, 
-              aes(x = values_x, y = values_y, label = variable),
-              color = "blue", vjust = 1.5) +
-    labs(x=NULL, y=NULL, title=title, subtitle=subtitle) +
-    facet_grid(x~y, scales="free",
-               labeller=labeller(x=labs$x, y=labs$y),
-               switch="both") +
-    theme_minimal() +
-    theme(strip.placement = "outside")
 }
 
 if(FALSE) {
