@@ -6,8 +6,19 @@
 #' @param scale_factor Factor by which the visual representation of the original variables will be scaled
 #' @param title optional plot title
 #' @param subtitle optional plot subtitle
+#' @param varlab_length number of characters to be used for variable labels.
+#'        If `NULL`, the full variable names are used.
+#' @param varlab_abbrev_show show the legend to the abbreviated variables? `TRUE/FALSE`.
+#'        Default: `TRUE`
+#' @param varlab_size variable label size; default 3.5
+#' @param varlab_nudge factor by which variable label is nudged; default 1.1
+#' @param varlab_color char/hexcode with desired color for the variable labels. Default: "blue"
+#' @param vararrow_color char/hexcode with desired color for the variable arrow. Default: "blue"
 plt_famd <- function(dat, clusters, dims=list(x=2:4, y=1),
-                     scale_factor=5, title=NULL, subtitle=NULL){
+                     scale_factor=5, title=NULL, subtitle=NULL,
+                     varlab_length=NULL, varlab_abbrev_show=TRUE,
+                     varlab_size=3.5, varlab_nudge=1.1,
+                     varlab_color='blue', vararrow_color='blue'){
   # Factorize flash if that hasn't been done yet
   if(!is.factor(dat$flash)) dat$flash <- factor(dat$flash)
   dim <- lapply(dims, \(d) sprintf("Dim.%d", d))
@@ -25,12 +36,27 @@ plt_famd <- function(dat, clusters, dims=list(x=2:4, y=1),
   # Extract variable coordinates and scale them
   var_coords <- famd_result$var$coord |>
     as_tibble() |> 
-    mutate(variable = rownames(famd_result$var$coord)) |> 
+    mutate(variable = rownames(famd_result$var$coord),
+           varlab = variable) |> 
     mutate(across(where(is.numeric), ~ .x * scale_factor)) |> 
     pivot_longer(all_of(dim$x), names_to = "x",
                  values_to = "values_x") |> 
     pivot_longer(all_of(dim$y), names_to = "y",
                  values_to = "values_y")
+ 
+  abbrev_caption <- NULL
+  if(!is.null(varlab_length)) { #this is not yet generalized. Confusion would arise if several variables had the same first letter(s)
+    if(!is.numeric(varlab_length) || length(varlab_length) != 1 || varlab_length < 1)
+      stop("varlab_length must be a single numeric value >= 1")
+    var_coords$varlab <- substr(var_coords$varlab, 1, varlab_length) |> 
+      str_to_title()
+    if(varlab_abbrev_show) {
+      abbrev_caption <- select(var_coords, varlab, variable) |> 
+        unique() |> 
+        apply(1, paste, collapse=' ... ') |> 
+        paste(collapse='; ')
+    }
+  }
   # Extract variance percentage
   labs <- lapply(dims, \(d) {
     famd_result$eig[,"percentage of variance"][d] |> 
@@ -47,11 +73,13 @@ plt_famd <- function(dat, clusters, dims=list(x=2:4, y=1),
                      color=cluster, shape=flash), size=2) +
       geom_segment(data = var_coords, x=0, y=0,
                    aes(xend = values_x, yend = values_y),
-                   arrow = arrow(length = unit(0.2, "cm")), color = "blue") +
+                   arrow = arrow(length = unit(0.2, "cm")), color = vararrow_color) +
       geom_text(data = var_coords, 
-                aes(x = values_x, y = values_y, label = variable),
-                color = "blue", vjust = 1.5) +
-      labs(x=NULL, y=NULL, title=title, subtitle=subtitle) +
+                aes(x = values_x*varlab_nudge, y = values_y*varlab_nudge,
+                    label = varlab),
+                color = varlab_color, size=varlab_size) +
+      labs(x=NULL, y=NULL, title=title, subtitle=subtitle,
+           caption=abbrev_caption) +
       facet_grid(y~x, scales="free",
                  labeller=labeller(x=labs$x, y=labs$y),
                  switch="both") +
