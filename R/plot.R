@@ -52,7 +52,7 @@ plt_famd <- function(dat, clusters, dims=list(x=2:4, y=1),
       str_to_title()
     if(varlab_abbrev_show) {
       abbrev_caption <- select(var_coords, varlab, variable) |> 
-        unique() |> 
+        unique() |> sort() |> 
         apply(1, paste, collapse=' ... ') |> 
         paste(collapse='; ')
     }
