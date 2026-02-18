@@ -44,7 +44,8 @@ scaled <- lapply(events, \(df) {
     rename(precipitation=rr)
 })
 
-varnames <- sprintf('part_iet_%d_station_%d', iet, stations)
+varnames <- sprintf('part_iet_%d_station_%d', iet, stations) |> 
+  setNames(stations)
 
 pth_out <- "data/clusres/"
 
@@ -53,7 +54,7 @@ if(!dir.exists(pth_out))
   dir.create(pth_out)
 }
 
-for(station in seq(stations)) {
+for(station in as.character(stations)) {
   part <- lapply(list(unname(clusvars),
                        unname(clusvars[names(clusvars)=='selected'])),
                   \(y) do_stabAn(scaled[[station]], y, k=K, verbose=TRUE)) |> 

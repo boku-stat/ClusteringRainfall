@@ -34,11 +34,9 @@ devtools::load_all() #alternatively, source(...) #TODO: add relevant function sc
 ################################################################################
 
 # IET values for robustness analysis
-#IET_VALUES <- c(3, 6, 12, 18, 24)
-IET_VALUES <- c(12,18,24) #for attempt 2, when the process broke for the report in 3 and 6
+IET_VALUES <- c(3, 6, 12, 18, 24)
 # Station selection
-#STATIONS <- c(30, 171)
-STATIONS <- 171 #for attempt 3, 12h broke for Dornbirn
+STATIONS <- c(30, 171)
 # Time series range
 RANGE <- list()
 RANGE$START <- ymd_hms("2010-01-01 00:00:00")
@@ -237,17 +235,13 @@ step4_partitioning_clustering <- function(iet) {
   })
   
   # Run clustering for each station
-  results <- list()
-  for (station_idx in seq_along(STATIONS)) {
-    station_id <- STATIONS[station_idx]
+  for (stn in as.character(STATIONS)) {
     
-    varname <- sprintf('part_iet_%d_station_%d', iet, station_id)
+    varname <- sprintf('part_iet_%d_station_%s', iet, stn)
     
-    part <- do_stabAn(scaled[[station_idx]], CLUS_VARS, k = K_VALUES,
+    part <- do_stabAn(scaled[[stn]], CLUS_VARS, k = K_VALUES,
                       verbose = VERBOSE,
                       b = N_BOOTSTRAP)
-    
-    results[[varname]] <- part
     
     fname_out <- sprintf("%s%s.RDA", PATHS$RESULTS, varname)
     save(list = "part", file = fname_out)
@@ -302,7 +296,6 @@ step5_clusterwise_regression <- function(iet) {
     gsub('.', '', x = ., fixed = TRUE)
   
   # Run regression models
-  results <- list()
   for (i in 1:nrow(model_options)) {
     station_id <- model_options$stationID[i] |> 
       as.character()
@@ -316,8 +309,6 @@ step5_clusterwise_regression <- function(iet) {
                  data = _,
                  model = FLXMRglm(REGRESSION_FORMULA, family = 'Gamma'),
                  control = list(iter.max = 100))
-    
-    results[[varnames[i]]] <- mod
     
     fname_out <- sprintf("%s%s.RDA", PATHS$RESULTS, varname)
     save(list = "mod", file = fname_out)

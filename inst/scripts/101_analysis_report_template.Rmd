@@ -31,14 +31,15 @@ knitr::opts_chunk$set(
 
 # Load required libraries
 library(rmarkdown)
-library(tidyverse)
-library(ggpubr)
+library(tidyverse) #✅
+library(ggpubr) #✅
 library(flexclust)
-library(flexmix)
+library(flexmix) #✅
 library(FactoMineR)
 library(philentropy)
 library(patchwork) #
 library(knitr)
+devtools::load_all() #✅
 
 theme_set(theme_minimal(base_size = 12)) #ggplot theme
 ```
@@ -47,8 +48,12 @@ theme_set(theme_minimal(base_size = 12)) #ggplot theme
 # Parameters
 iet <- params$iet
 stations <- params$stations
-path_results <- paste0("../../", params$path_results) #relative to .Rnw file
-path_dat <- paste0("../../", params$path_dat)
+pths <- function(path) {
+  ifelse(startsWith(path, '/'), #in the offline case, where the source files are stored separately
+         path, paste0('../../', path)) #in the 'online' repo/HPC case, relative to .Rmd
+}
+path_dat <- pths(params$path_dat)
+path_results <- pths(params$path_results)
 filt <- params$filt
 ks <- params$ks
 clusvars <- params$clusvars
@@ -59,8 +64,7 @@ chosen_ks <- params$chosen_ks
 dat <- sprintf("%smodel_input_events_iet_%dh_%d.RDS",
         path_dat, iet, stations) |> 
   sapply(readRDS, simplify=FALSE) %>%
-  setNames(gsub('[^0-9]', '', names(.))) %>%
-  setNames(gsub('4', '', names(.))) |> 
+  setNames(str_extract(names(.), "\\d+(?=\\.RDS)"))|> 
   lapply(\(df) {
   mutate(df,
          flash = as.logical(flash),
@@ -74,19 +78,30 @@ part <- new.env() #already contains stability analysis
 mod <- new.env()
 modStab <- new.env()
 
+ld2env <- function(pathvec, env, pattern="\\d+(?=\\.RDA)") {
+  for(i in pathvec) {
+    stn <- str_extract(i, pattern = pattern)
+    before <- ls(env)
+    load(i, envir = env)
+    obj_name <- setdiff(ls(env), before)   # find what was just loaded
+    assign(stn, get(obj_name, envir = env), envir = env)
+    rm(list = obj_name, envir = env)
+  }
+}
+
 res <- sprintf("%spart_iet_%d_station_%d.RDA",
                path_results, iet, stations)
-for(i in res) load(i, envir=part)
+ld2env(res, part)
 parts <- ls(envir=part)
 
 res <- sprintf("%smod_iet_%d_filt_%g_station_%d.RDA",
                path_results, iet, filt, stations)
-for(i in res) load(i, envir=mod)
+ld2env(res, mod)
 mods <- ls(envir=mod)
 
 res <- sprintf("%smod_iet_%d_filt_%g_station_%d_stabAn.RDA",
                path_results, iet, filt, stations)
-for(i in res) load(i, envir=modStab)
+ld2env(res, modStab, "\\d+(?=\\_stabAn.RDA)")
 modStabs <- ls(envir=modStab)
 ```
 
@@ -111,19 +126,16 @@ This report presents the results of precipitation event clustering and clusterwi
 ```{r ari-global-part, fig.height=8}
 lapply(parts, \(mdl) {
   partres <- part[[mdl]]
-  stn <- str_extract(mdl, "\\d+$")
   partres$globalStability |> 
     ggplot(aes(x=k, y=ARI)) +
     geom_boxplot() +
-    labs(title=sprintf("station: %s", stn))
+    labs(title=sprintf("station: %s", mdl))
 }) |> ggarrange(plotlist=_) |> 
   annotate_figure(top="Partitioning clustering")
 ```
 ```{r ari-global-mod, fig.height=8}
 lapply(modStabs, \(mdl) {
   regres <- modStab[[mdl]]
-  stn <- str_extract(mdl, "\\d+_stabAn$") |> 
-    str_extract("\\d+")
   regres$rand |> 
     as.data.frame() |> 
     pivot_longer(everything(),
@@ -131,7 +143,7 @@ lapply(modStabs, \(mdl) {
                  values_to = "ARI") |> 
     ggplot(aes(x=k, y=ARI)) +
     geom_boxplot() +
-    labs(title=sprintf("station: %s", stn))
+    labs(title=sprintf("station: %s", mdl))
 }) |> ggarrange(plotlist=_) |> 
   annotate_figure(top="Clusterwise regression")
 rm(list=ls(pattern="modStab"))
@@ -144,12 +156,11 @@ Segment-level stability analysis examines the stability of each segment. Only ru
 ```{r ari-segment, fig.height=10}
 lapply(parts, \(mdl) {
   partres <- part[[mdl]]
-  stn <- str_extract(mdl, "\\d+$")
   partres$segLevelStability |> 
     ggplot(aes(x=segment, y=ARI)) +
     geom_boxplot() +
     facet_wrap(~k, scales="free_x") +
-    labs(title=sprintf("station: %s", stn))
+    labs(title=sprintf("station: %s", mdl))
 }) |> ggarrange(plotlist=_) |> 
   annotate_figure(top="Partitioning clustering")
 
