@@ -90,10 +90,10 @@ for (path in PATHS) {
 
 #******
 #hiiiiiii - for the reports, change afterwards
-IET_VALUES <- 6
+IET_VALUES <- 3
 PATHS$EVENTS_COMBINED <- '/media/nwnr/Projekte/EROSA-Stat/Tawes_stations/data/events_combined/'
 PATHS$RESULTS <- '/media/nwnr/Projekte/EROSA-Stat/Tawes_stations/data/clusres/'
-CHOSEN_Ks <- c(3, 3, 5, 4) |> 
+CHOSEN_Ks <- c(3, 3, 2, 2) |> 
   setNames(c('part171', 'part30', 'mod171', 'mod30'))
 #
 
