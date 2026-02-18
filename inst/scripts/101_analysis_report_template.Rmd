@@ -119,7 +119,7 @@ This report presents the results of precipitation event clustering and clusterwi
 
 ## 1.1 Adjusted Rand Index (ARI) - Global Stability of clustering solutions
 
-```{r ari-global-part, fig.height=8}
+```{r ari-global-part, fig.height=4, fig.width=7, echo=FALSE}
 lapply(parts, \(mdl) {
   partres <- part[[mdl]]
   partres$globalStability |> 
@@ -129,7 +129,7 @@ lapply(parts, \(mdl) {
 }) |> ggarrange(plotlist=_) |> 
   annotate_figure(top="Partitioning clustering")
 ```
-```{r ari-global-mod, fig.height=8}
+```{r ari-global-mod, fig.height=4, fig.width=7, echo=FALSE}
 lapply(modStabs, \(mdl) {
   regres <- modStab[[mdl]]
   regres$rand |> 
@@ -149,7 +149,7 @@ rm(list=ls(pattern="modStab"))
 
 Segment-level stability analysis examines the stability of each segment. Only run for partitioning clustering. 
 
-```{r ari-segment, fig.height=10}
+```{r ari-segment, fig.height=8, fig.width=7, echo=FALSE}
 lapply(parts, \(mdl) {
   partres <- part[[mdl]]
   partres$segLevelStability |> 
@@ -160,9 +160,13 @@ lapply(parts, \(mdl) {
 }) |> ggarrange(plotlist=_) |> 
   annotate_figure(top="Partitioning clustering")
 
+kmssg <- ifelse(is.null(chosen_ks),
+                "**CAUTION, For the automatized reports the ks chosen for IET=4h are chosen as a starting default, and will possibly have to be adjusted manually.**",
+                "**CAUTION, The optimal k was chosen visually based on the above ARI plots, rerun with different values if preferred.**")
+
 ```
 
-**CAUTION, The optimal k is chosen visually based on the above ARI plots. For the automatized reports, the ks chosen for IET=4h are chosen as a starting default, and will possibly have to be adjusted manually.**
+`r kmssg`
 
 ---
 
@@ -170,7 +174,7 @@ lapply(parts, \(mdl) {
 
 ## 2.1 FAMD plots
 
-```{r famd-plots, fig.height=10}
+```{r famd-plots, fig.height=8, fig.width=7, echo=FALSE}
 
 if(is.null(chosen_ks)) {
   chosen_ks <- c(3, 3, 4, 2) |> as.character()
@@ -240,7 +244,7 @@ apply(allmod, 1, \(i) {
 
 Marginal effect of each (main effect of a) predictor on the response variable, applied only to clusterwise regression results.
 
-```{r pdp-plots, fig.height=12}
+```{r pdp-plots, fig.height=6, fig.width=7, echo=FALSE}
 
 lapply(mods, \(mdl) {
   mod_type <- "mod"
@@ -260,7 +264,7 @@ lapply(mods, \(mdl) {
 
 ## 2.3 Clusterwise Empirical Cumulative Distribution Functions (ECDF)
 
-```{r ecdf-plots, fig.height=10}
+```{r ecdf-plots, fig.height=6, fig.width=7, echo=FALSE}
 
 lapply(stations, \(stn) {
   i <- allmod$station==stn
@@ -285,7 +289,7 @@ lapply(stations, \(stn) {
 # 2.1 Kullback-Leibler Divergence Analysis
 
 
-```{r kl-divergence, results='asis'}
+```{r kl-divergence, results='asis', echo=FALSE}
 
 LENGTH_OUT <- 1000
 
@@ -324,7 +328,7 @@ KL |> t() |>
 These plots compare the fits of the simple theoretical distribution and the clusterwise-aggregate theoretical distribution to the empirical CDF of the precipitation time series.
 
 
-```{r cdf-comparison, fig.height=12}
+```{r cdf-comparison, fig.height=6, fig.width=7, echo=FALSE}
 
 lapply(stations, \(stn) {
   i <- allmod$station==stn

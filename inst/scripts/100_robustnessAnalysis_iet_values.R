@@ -88,6 +88,15 @@ for (path in PATHS) {
   }
 }
 
+#******
+#hiiiiiii - for the reports, change afterwards
+IET_VALUES <- 6
+PATHS$EVENTS_COMBINED <- '/media/nwnr/Projekte/EROSA-Stat/Tawes_stations/data/events_combined/'
+PATHS$RESULTS <- '/media/nwnr/Projekte/EROSA-Stat/Tawes_stations/data/clusres/'
+CHOSEN_Ks <- c(3, 3, 5, 4) |> 
+  setNames(c('part171', 'part30', 'mod171', 'mod30'))
+#
+
 ################################################################################
 # STEP 1: DOWNLOAD PRECIPITATION TIME SERIES DATA
 ################################################################################
@@ -365,7 +374,7 @@ step6_generate_report <- function(iet) {
                    ks=K_VALUES,
                    clusvars=CLUS_VARS,
                    regvars=CLUS_VARS[regvars],
-                   chosen_ks=NULL), #otherwise list named as mod171, part30,...
+                   chosen_ks=CHOSEN_Ks), #default setting: 'NULL'
       envir = new.env()
     )
    
@@ -424,6 +433,8 @@ main <- function(step1=TRUE,
     } else {
       message("\n=== STEP 6: Skipped ===\n")
     }
+    
+    
     
   }
   
