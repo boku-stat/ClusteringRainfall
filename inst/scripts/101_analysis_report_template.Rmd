@@ -29,19 +29,15 @@ knitr::opts_chunk$set(
   dpi = 300
 )
 
-# Load required libraries
-library(rmarkdown)
-library(tidyverse) #✅
-library(ggpubr) #✅
-library(flexclust)
-library(flexmix) #✅
+library(tidyverse)
+library(ggpubr)
+library(flexmix)
 library(FactoMineR)
 library(philentropy)
-library(patchwork) #
 library(knitr)
-devtools::load_all() #✅
+devtools::load_all()
 
-theme_set(theme_minimal(base_size = 12)) #ggplot theme
+theme_set(theme_minimal(base_size = 12))
 ```
 
 ```{r load-data, include=FALSE}
@@ -211,15 +207,23 @@ mod <- sapply(mods, \(mdl) {
   
 }, simplify=FALSE)
 
-clusses <- c(part, mod)
-allmod <- c(parts, mods)
+allmod <- data.frame(
+  mod_type=c(rep('part', length(part)),
+             rep('mod', length(mod))),
+  station=c(names(part), names(mod))
+) |> 
+  mutate(mdl=paste0(mod_type, station)) |> 
+  left_join(enframe(chosen_ks, name='mdl', value='chosen_k'))
+clusses <- setNames(c(part, mod),
+                    allmod$mdl)
 
-FAMD_DIMS <- list(x=1, y=2:4) #dims passt was nicht
+FAMD_DIMS <- list(x=1, y=2:4)
 
-lapply(allmod, \(mdl) {
-  stn <- str_extract(mdl, "\\d+$")
-  mod_type <- str_split_i(mdl, "_", 1)
-  kstar <- chosen_ks[paste0(mod_type, stn)]
+apply(allmod, 1, \(i) {
+  stn <- i['station']
+  mdl <- i['mdl']
+  mod_type <- i['mod_type']
+  kstar <- i['chosen_k']
   plt_famd(dat[[stn]][clusvars],
            clusses[[mdl]]$clus_short,
            dims=FAMD_DIMS,
@@ -239,13 +243,13 @@ Marginal effect of each (main effect of a) predictor on the response variable, a
 ```{r pdp-plots, fig.height=12}
 
 lapply(mods, \(mdl) {
-  stn <- str_extract(mdl, "\\d+$")
   mod_type <- "mod"
-  kstar <- chosen_ks[paste0(mod_type, stn)]
+  kstar <- filter(allmod, mod_type==mod_type &
+                    station==mods[1])$chosen_k
   plt_dpd_flexmix(mod[[mdl]]$mod,
                   setdiff(regvars, "flash"),
                   fac_var="flash",
-                  title=sprintf("Station: %s; Mod.Type: %s; k=%s", stn, mod_type, kstar))
+                  title=sprintf("Station: %s; Mod.Type: %s; k=%s", mdl, mod_type, kstar))
 }) %>% ggarrange(plotlist=., ncol=1,
                  legend.grob=get_legend(.[[which.max(chosen_ks[grep("mod", names(chosen_ks))])]] +
                                           theme(legend.position = 'bottom')),
@@ -259,11 +263,10 @@ lapply(mods, \(mdl) {
 ```{r ecdf-plots, fig.height=10}
 
 lapply(stations, \(stn) {
-
-  mdls <- grep(stn, names(clusses), value=TRUE)
-  lbls <- names(clusses[mdls]) |>
-    sapply(str_split_i, "_", 1) |> 
-    sapply(\(x) paste("Type:", x))
+  i <- allmod$station==stn
+  mdls <- allmod$mdl[i]
+  lbls <- paste("Type:", allmod$mod_type[i]) |> 
+    setNames(mdls)
   dat[[as.character(stn)]] |> 
     rename(rr=precipitation) |>
     plt_ecdf(clus_obj = lapply(clusses[mdls], `[[`, "clus_short"),
@@ -286,9 +289,10 @@ lapply(stations, \(stn) {
 
 LENGTH_OUT <- 1000
 
-KL <- sapply(allmod, \(mdl) {
+KL <- apply(allmod, 1, \(i) {
   
-  stn <- str_extract(mdl, "\\d+$")
+  stn <- i['station']
+  mdl <- i['mdl']
   rr <- dat[[stn]]$precipitation
   
   pdf_theoretical <- 
@@ -323,18 +327,17 @@ These plots compare the fits of the simple theoretical distribution and the clus
 ```{r cdf-comparison, fig.height=12}
 
 lapply(stations, \(stn) {
-
-  mdls <- grep(stn, names(clusses), value=TRUE)
-  lbls <- names(clusses[mdls]) |>
-    sapply(str_split_i, "_", 1) |> 
-    sapply(\(x) paste("Type:", x))
+  i <- allmod$station==stn
+  mdls <- allmod$mdl[i]
+  lbls <- paste("Type:", allmod$mod_type[i]) |> 
+    setNames(mdls)
   dat[[as.character(stn)]] |> 
     rename(rr=precipitation) |>
     plt_cdf_comp(clus_vec = lapply(clusses[mdls], `[[`, "clus_short"),
                  filt=filt,
                  title=paste("Station:", stn),
                  subtitle=lbls)
-}) |> ggarrange(plotlist=_, ncol=1,
+  }) |> ggarrange(plotlist=_, ncol=1,
                common.legend=TRUE,
                legend='bottom')
 

@@ -438,23 +438,8 @@ main(
   step1 = FALSE, # download precipitation time series data
   step2 = FALSE, # derive events and event characteristics
   step3 = FALSE, # combine event and flash data
-  step4 = TRUE, # partitioning clustering (+stability analysis)
-  step5 = TRUE, # clusterwise regression (+stability analysis)
-  step6 = FALSE # generate diagnostic reports
+  step4 = FALSE, # partitioning clustering (+stability analysis)
+  step5 = FALSE, # clusterwise regression (+stability analysis)
+  step6 = TRUE # generate diagnostic reports
 )
-#TODO: Fix error in FAMD plots, reports prolly won't run through anyways, uncheck this "nona-based" selection
-#right now: run steps 4+5 for IET 12 and 24 (which are when the process broke)
-#then restart for all iet with step6
-
-#nona-Monitoring:
-#zettlchen@nona04:~/EROSA_robust$ R CMD BATCH inst/scripts/100_robustnessAnalysis_iet_values.R &
-#[1] 3955544
-#zettlchen@nona04:~/EROSA_robust$ timedatectl
-#               Local time: Thu 2026-01-15 12:00:40 CET
-#           Universal time: Thu 2026-01-15 11:00:40 UTC
-#                 RTC time: Thu 2026-01-15 11:00:40
-#                Time zone: Europe/Vienna (CET, +0100)
-#System clock synchronized: yes
-#              NTP service: active
-#          RTC in local TZ: no
 
