@@ -242,6 +242,15 @@ plt_ecdf <- function(dat, clus_obj, k=NULL, filt=0,
     labs <- list(model=subtitle)
   }
   
+  pal <- c(
+    scales::hue_pal()(3),
+    scales::hue_pal()(8)[c(7, 8, 5)]
+  )
+  if(length(pal)<k) {
+    pal <- scales::hue_pal()(k)
+  }
+  pal <- pal[1:k] |> setNames(1:k)
+  
   ggplot(df, aes(x=rr)) +
     stat_ecdf(geom='step', aes(color='all observations')) +
     stat_ecdf(geom='step', aes(color=clusters)) +
@@ -253,8 +262,7 @@ plt_ecdf <- function(dat, clus_obj, k=NULL, filt=0,
          x='Precipitation (mm)', y='ECDF') +
     scale_color_manual(name='Group',
                        values=c(`all observations` = 'black',
-                                setNames(scales::hue_pal()(k),
-                                         1:k)),
+                                pal),
                        labels = \(x) ifelse(x == 'all observations', x,
                                             paste('Cluster', x))) +
     theme(strip.background = element_blank(),
