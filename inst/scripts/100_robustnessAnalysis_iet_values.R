@@ -13,7 +13,7 @@
 #   2. Data preparation (flash + precipitation)
 #   3. Partitioning clustering with stability analysis
 #   4. Clusterwise regression with stability analysis
-#   4. Report generation (graphs and Kullback-Leibler divergence values)
+#   5. Report generation (graphs and Kullback-Leibler divergence values)
 #
 ################################################################################
 
