@@ -71,7 +71,7 @@ plt_famd <- function(dat, clusters, dims=list(x=2:4, y=1),
     ggplot() +
       geom_point(data = ind_coords,
                  aes(x=values_x, y=values_y,
-                     color=cluster, shape=flash), size=2) +
+                     color=cluster, shape=flash), size=2, alpha=alpha) +
       geom_segment(data = var_coords, x=0, y=0,
                    aes(xend = values_x, yend = values_y),
                    arrow = arrow(length = unit(0.2, "cm")), color = vararrow_color) +
