@@ -14,11 +14,12 @@
 #' @param varlab_nudge factor by which variable label is nudged; default 1.1
 #' @param varlab_color char/hexcode with desired color for the variable labels. Default: "blue"
 #' @param vararrow_color char/hexcode with desired color for the variable arrow. Default: "blue"
+#' @param alpha alpha value of the geom_points. Default: 1
 plt_famd <- function(dat, clusters, dims=list(x=2:4, y=1),
                      scale_factor=5, title=NULL, subtitle=NULL,
                      varlab_length=NULL, varlab_abbrev_show=TRUE,
                      varlab_size=3.5, varlab_nudge=1.1,
-                     varlab_color='blue', vararrow_color='blue'){
+                     varlab_color='blue', vararrow_color='blue', alpha=1){
   # Factorize flash if that hasn't been done yet
   if(!is.factor(dat$flash)) dat$flash <- factor(dat$flash)
   dim <- lapply(dims, \(d) sprintf("Dim.%d", d))
