@@ -1,6 +1,6 @@
 # Improving stochastic rainfall models through event clustering - Supplementary code
 
-In this repository, we have collected all code and scripts necessary to (re-)run the analyses from "Improving stochastic rainfall models through event clustering" by Ortega Menjivar et al. (2026+).
+In this repository, we have collected all code and scripts necessary to (re-)run the analyses from "Process-aware mixture modelling of precipitation-event distributions using event-type clustering" by Ortega Menjivar et al. (2026+).
 
 ## Package organization
 
