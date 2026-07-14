@@ -22,9 +22,8 @@ ssf <- st_as_sf(stations, coords = c("lon", "lat"), crs = 4326)
 ssf_buffer <- st_transform(ssf, crs = 31287)  |> st_buffer(dist = units::set_units(7, "km"))
 
 # Add flash data
-#--DON'T RUN--- caution: raw file needed for the next line is not provided as it is owned by ALDIS. Processed stationwise flash data (as produced by this script, see below) is provided in this repository
+#--DON'T RUN--- caution: raw file needed for the next lines is not provided as it is owned by ALDIS. Processed stationwise flash data (as produced by this script, see below) is provided in this repository
 flash <- read_csv("data/ALDIS/lightning.csv")
-#-------
 flash_sf <- st_as_sf(flash, coords = c("longitude", "latitude"), crs = 4326)
 flash_sf <- st_transform(flash_sf, crs = 31287)
 time <- tibble(date = seq(ymd_hms("2010-01-01 00:00:00"), ymd_hms("2022-12-31 23:00:00"), by = "hour"))
@@ -45,6 +44,7 @@ lapply(unique(joined_sel$id), save_flash,
        path_out = path_out,
        flash_data = joined_sel,
        time_data = time)
+#-------
 
 ################################################################################
 #--------- Joining Flash data, Event data and raw precipitation records --------
