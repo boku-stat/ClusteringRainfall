@@ -153,15 +153,15 @@ lapply(clusses[mod], \(obj) {
 
 ## groupwise ECDFs
 graz <- grepl('30', names(clusses))
-foo <- function(x) {
+get_lbls <- function(x) {
   lbls <- clusses[x] |> lapply(`[[`, 'lab')
   station <- str_split_1(lbls[[1]], ',')[1]
   lbls <- setNames(str_split_fixed(lbls, ', ', 2)[,2],
                    names(lbls))
   list(station=station, lbls=lbls)
 }
-lbls_G <- foo(graz)
-lbls_D <- foo(!graz)
+lbls_G <- get_lbls(graz)
+lbls_D <- get_lbls(!graz)
 
 list(
   plt_ecdf(events$`30`,
