@@ -1,8 +1,3 @@
-
-# Source: N/nwnr/Projekte/EROSA-Stat/Tawes_stations/download_station_data.R, 01.10.25
-# split into functions and script (<-- in inst/001_download_station_data.R)
-
-
 ################################################################################
 ########## Functions for downloading TAWES stations data #######################
 ################################################################################

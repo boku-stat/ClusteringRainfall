@@ -97,7 +97,6 @@ plt_famd <- function(dat, clusters, dims=list(x=2:4, y=1),
       theme(strip.placement = "outside")
   
 }
-#Source: adapted from github.com/glaaha/mixrain/R/famd_analysis.R
 
 
 
@@ -144,7 +143,6 @@ plt_famd <- function(dat, clusters, dims=list(x=2:4, y=1),
   out <- out[,grep('Intercept', colnames(out), invert=TRUE)] # Do not need Intercept column for final output #caution, in our preferred model specification we've turned off the Intercept
   out
 }
-#Source: adapted from N: Projekte/EROSA-Stat/Tawes_stations/pdp_flexmix.R
 
 #' Plot Partial Dependency Plots of a `flexmix` clusterwise regression object: Step 2: plot
 #' @param model object of class `flexmix` that has been calculated with covariates (i.e. clusterwise regression)
@@ -270,7 +268,6 @@ plt_ecdf <- function(dat, clus_obj, k=NULL, filt=0,
     theme(strip.background = element_blank(),
           legend.position = 'bottom')
 }
-#Source: adapted from github.com/glaaha/mixrain/R/dist_analysis.R
 
 #' Visual comparison of overall Gamma vs. clusterwise-aggregated Gamma distributions
 #' to precipitation ECDF
