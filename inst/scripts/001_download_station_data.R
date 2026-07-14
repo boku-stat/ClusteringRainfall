@@ -30,8 +30,8 @@ climatic_variables <- parsed_obj$parameters[,1:4] # Precipitation variable name 
 # We have to limit the stations dataset from 2009 to 2022 - this is the period where we have flash data
 stations <- stations %>% filter(year(valid_from) <= 2009 & year(valid_to) == 2022) 
 
-### Download data for the selected stations (Dornbirn=171; Bad Mitterndorf=10; Graz=30)
-ids <- c(10,30,171)
+### Download data for the selected stations (Dornbirn=171; Graz=30)
+ids <- c(30,171)
 stations <- stations %>% filter(id %in% ids)
 
 write_csv(stations[c("id", "name", "state", "lon", "lat", "altitude")], "data/selected_stations_metadata.csv")
