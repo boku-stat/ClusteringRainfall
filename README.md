@@ -25,7 +25,7 @@ Note that function documentations are written in `roxygen2` syntax. This means t
  
 ## How to cite
 
-If you use this code, please cite this repository via its archived version: [Zenodo DOI to be added upon release],  
+If you use this code, please cite this repository via its archived version: [DOI: 10.5281/zenodo.21358298](https://doi.org/10.5281/zenodo.21358298),  
 or the accompanying paper:
 
 > Ortega Menjivar, L., Özcelik, N. B., Laimighofer, J., Fischer, S., and Laaha, G. (2026+): Process-aware mixture modelling of precipitation-event distributions using event-type clustering, Hydrol. Earth Syst. Sci. [DOI to be added upon publication]
