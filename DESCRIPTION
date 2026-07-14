@@ -1,6 +1,6 @@
 Package: ClusteringRainfall
 Type: Package
-Title: Repository containing Reproduction Code for "Improving stochastic rainfall models through event classification" by Ortega Menjivar et al. (2026+)
+Title: Repository containing Reproduction Code for "Process‑aware mixture modelling of precipitation-event distributions using event‑type clustering" by Ortega Menjivar et al. (2026+)
 Version: 0.1
 Date: 2026-01-09
 Authors@R: c(
