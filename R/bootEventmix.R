@@ -268,7 +268,7 @@ bootEventmix <- function(x, k, formula=x~1, model=FLXMCnorm1(), filter=0,
   comps1 <- lapply(z, \(y) sapply(y$comps1, `[[`, 1))
   comps2 <- lapply(z, \(y) sapply(y$comps2, `[[`, 1))
   
-  #open TODO: write a more practical formulation of @posteriors and @components
+  #note: writing a more practical formulation of @posteriors and @components would increase user-friendliness
   
   post1 <- lapply(z, \(y) {
     scaled <- sapply(y$post1, `[[`, 'scaled')

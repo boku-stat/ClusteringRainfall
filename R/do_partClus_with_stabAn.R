@@ -73,7 +73,3 @@ do_stabAn <- function(df, clusvars, k, verbose=FALSE, b=100) {
   res
   
 }
-
-if(FALSE) {
-  do_stabAn(scaled$`30`, unname(clusvars), k=K, verbose=TRUE)
-}
