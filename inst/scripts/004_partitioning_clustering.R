@@ -31,7 +31,7 @@ events <- paste0(pth_prec,
                  'model_input_events_iet_', iet,
                  'h_*.RDS') |> 
   Sys.glob() %>% 
-  grep(paste(stations, collapse='|'), x=_, value=TRUE) |> 
+  grep(paste(stations, collapse='|'), x=., value=TRUE) |> 
   sapply(readRDS, simplify=FALSE) %>%
   setNames(gsub('[^0-9]', '', names(.))) %>%
   setNames(gsub('4', '', names(.)))
