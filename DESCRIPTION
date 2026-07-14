@@ -1,6 +1,6 @@
 Package: ClusteringRainfall
 Type: Package
-Title: Repository containing Reproduction Code for "Process‑aware mixture modelling of precipitation-event distributions using event‑type clustering" by Ortega Menjivar et al. (2026+)
+Title: Repository containing Reproduction Code for "Process-aware mixture modelling of precipitation-event distributions using event-type clustering" by Ortega Menjivar et al. (2026+)
 Version: 1.0.0
 Date: 2026-07-14
 Authors@R: c(
@@ -19,7 +19,7 @@ Authors@R: c(
            comment = c(ORCID = "0000-0002-6793-9640"))
     )
 Maintainer: Lena Ortega Menjivar <lena.ortega-menjivar@boku.ac.at>
-Description: Reproduction code and analysis pipeline for improving theoretical distribution fit to precipitation time series by separating the time series into rainfall events, enriching them with lightning occurence data, clustering the rainfall events via two comparative approaches, and fitting and aggregating clusterwise theoretical Gamma distributions. Note that this repository has not been tested as a "full R package" but rather only for simulated use via `devtools::load_all()`.
+Description: Reproduction code and analysis pipeline for improving theoretical distribution fit to precipitation time series by separating the time series into rainfall events, enriching them with lightning occurrence data, clustering the rainfall events via two comparative approaches, and fitting and aggregating clusterwise theoretical Gamma distributions. Note that this repository has not been tested as a "full R package" but rather only for simulated use via `devtools::load_all()`.
 License: GPL-3
 Encoding: UTF-8
 Depends:
