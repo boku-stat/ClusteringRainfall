@@ -161,7 +161,7 @@ plt_famd <- function(dat, clusters, dims=list(x=2:4, y=1),
 #' @param title optional plot title
 #' @param subtitle optional plot subtitle
 #' Note that this function is only adapted to work with factors with `contr.treatment` type contrasts.
-plt_dpd_flexmix <- function(model, eval_vars,
+plt_pdp_flexmix <- function(model, eval_vars,
                             effect_vars=eval_vars,
                             effect_type_main=TRUE,
                             fac_var,

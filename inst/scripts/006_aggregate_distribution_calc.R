@@ -28,7 +28,7 @@ library(lmom)
 library(philentropy)
 library(ggpubr)
 library(FactoMineR)
-devtools::load_all() #used functions: .get_clusters, aggregate_dist_calc, .get_KL, plt_famd, plt_dpd_flexmix, plt_ecdf, plt_cdf_comp
+devtools::load_all() #used functions: .get_clusters, aggregate_dist_calc, .get_KL, plt_famd, plt_pdp_flexmix, plt_ecdf, plt_cdf_comp
 
 pth_prec <- 'data/events_combined/'
 pth_res <- 'data/clusres'
@@ -144,7 +144,7 @@ lapply(clusses, \(obj) {
 ## PDP plots
 mod <- grep('mod', names(clusses))
 lapply(clusses[mod], \(obj) {
-  plt_dpd_flexmix(obj$mod, covars, fac_var='flash',
+  plt_pdp_flexmix(obj$mod, covars, fac_var='flash',
                   title=obj$lab)
 }) %>% ggarrange(plotlist=., ncol=1,
                  legend.grob=get_legend(.[[which.max(k[mod])]] +

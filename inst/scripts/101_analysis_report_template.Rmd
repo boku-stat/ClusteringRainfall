@@ -250,7 +250,7 @@ lapply(mods, \(mdl) {
   mod_type <- "mod"
   kstar <- filter(allmod, mod_type==mod_type &
                     station==mods[1])$chosen_k
-  plt_dpd_flexmix(mod[[mdl]]$mod,
+  plt_pdp_flexmix(mod[[mdl]]$mod,
                   setdiff(regvars, "flash"),
                   fac_var="flash",
                   title=sprintf("Station: %s; Mod.Type: %s; k=%s", mdl, mod_type, kstar))
