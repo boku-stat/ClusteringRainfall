@@ -19,7 +19,7 @@ library(flexmix)
 library(parallel)
 devtools::load_all() #used functions: bootEventmix, modified MClapply (in script bootflexmix.R)
 
-pth_prec <- 'data/events_combined'
+pth_prec <- 'data/events_combined/'
 iet <- 4
 stations <- c(30, 171)
 start_seed <- as.numeric(as.Date('2025-08-26'))
@@ -33,14 +33,13 @@ cores <- max(1, floor(parallel::detectCores()*0.8))
 
 set.seed(start_seed)
 
-events <- paste0(pth_prec,
-                 'model_input_events_iet_', iet,
-                 'h_*.RDS') |> 
-  Sys.glob() |> 
-  grep(paste(stations, collapse='|'), x=_, value=TRUE) |> 
-  sapply(readRDS, simplify=FALSE) %>%
-  setNames(gsub('[^0-9]', '', names(.))) %>%
-  setNames(gsub('4', '', names(.)))
+
+events <- sprintf("%smodel_input_events_iet_%dh_*.RDS",
+                  pth_prec, iet) |> 
+  Sys.glob() %>% 
+  grep(paste(stations, collapse='|'), x = ., value = TRUE) |> 
+  sapply(readRDS, simplify = FALSE) %>%
+  setNames(gsub('.*_(\\d+)\\.RDS$', '\\1', names(.)))
 
 scaled <- lapply(events, \(df) {
   mutate(df,

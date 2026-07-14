@@ -25,14 +25,12 @@ clusvars <- c('severity', 'magnitude', 'duration',
 
 set.seed(start_seed)
 
-events <- paste0(pth_prec,
-                 'model_input_events_iet_', iet,
-                 'h_*.RDS') |> 
+events <- sprintf("%smodel_input_events_iet_%dh_*.RDS",
+                  pth_prec, iet) |> 
   Sys.glob() %>% 
-  grep(paste(stations, collapse='|'), x=., value=TRUE) |> 
-  sapply(readRDS, simplify=FALSE) %>%
-  setNames(gsub('[^0-9]', '', names(.))) %>%
-  setNames(gsub('4', '', names(.)))
+  grep(paste(stations, collapse='|'), x = ., value = TRUE) |> 
+  sapply(readRDS, simplify = FALSE) %>%
+  setNames(gsub('.*_(\\d+)\\.RDS$', '\\1', names(.)))
 
 scaled <- lapply(events, \(df) {
   mutate(df,

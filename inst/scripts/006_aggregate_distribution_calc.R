@@ -43,11 +43,12 @@ dims <- list(x=1, y=2:4)
 covars <- c('magnitude', 'duration', 'time_to_peak')
 length_out <- 1000
 
-events <- paste0(pth_prec, 'model_input_events_iet_%dh_%d.RDS') |> 
-  sprintf(iet, stations) |> 
-  sapply(readRDS, simplify=FALSE) %>%
-  setNames(gsub('[^0-9]', '', names(.))) %>%
-  setNames(gsub('4', '', names(.)))
+events <- sprintf("%smodel_input_events_iet_%dh_*.RDS",
+                  pth_prec, iet) |> 
+  Sys.glob() %>% 
+  grep(paste(stations, collapse='|'), x = ., value = TRUE) |> 
+  sapply(readRDS, simplify = FALSE) %>%
+  setNames(gsub('.*_(\\d+)\\.RDS$', '\\1', names(.)))
 
 scaled <- lapply(events, \(df) {
   mutate(df,
