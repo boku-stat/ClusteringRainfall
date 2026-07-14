@@ -1,8 +1,6 @@
 # Work horse function for partitioning clustering including global and segment
 # level stability analysis
 
-# Stand: 26.11.25
-
 #' Function to run all partitioning clustering steps (repeated clustering over a
 #' vector of k's; global stability analysis; and segment level stability analysis)
 #' @return a list of:
@@ -14,6 +12,13 @@
 #' @param k numeric vector of k's to be tested
 #' @param verbose Shall the functions give console status updates? Default=FALSE
 #' @param b number of bootstrap runs
+#' @examples
+#' \dontrun{
+#' # `scaled` as prepared in inst/scripts/004_partitioning_clustering.R
+#' clusvars <- c('severity', 'magnitude', 'duration',
+#'               'intensity', 'time_to_peak', 'flash')
+#' part <- do_stabAn(scaled[["30"]], clusvars, k = 2:8, verbose = TRUE)
+#' }
 do_stabAn <- function(df, clusvars, k, verbose=FALSE, b=100) {
 
   res <- list(globalStability=NA,

@@ -1,8 +1,18 @@
-#rewriting it to bootstrap events - should be much faster too
-#21.07.25
-
-#rewriting flexclust:::MClapply so that it'll handle *actually multiple*
-#cores, and not just two (default value of parallel::mclapply)
+#' Parallel lapply with a configurable number of cores
+#'
+#' Re-implementation of \code{flexclust:::MClapply} that exposes the
+#' number of cores as a parameter (instead of \code{parallel::mclapply}'s
+#' default of 2 cores).
+#' @param X list of elements to iterate over
+#' @param FUN function to apply
+#' @param multicore logical, or a cluster object created by
+#'        \code{parallel::makeCluster()}. If \code{FALSE}, a plain
+#'        \code{lapply()} is used.
+#' @param mc.cores number of cores passed to \code{parallel::mclapply()}
+#'        (default 2; ignored if \code{multicore} is a cluster object or
+#'        \code{FALSE})
+#' @param ... further arguments passed to \code{FUN}
+#' @return a list of results, as returned by \code{lapply()}
 MClapply <- function (X, FUN, multicore = TRUE, mc.cores=2, ...) 
 {
   if (inherits(multicore, "cluster")) 
@@ -12,7 +22,57 @@ MClapply <- function (X, FUN, multicore = TRUE, mc.cores=2, ...)
   else lapply(X, FUN, ...)
 }
 
-#bootstrapping of flexmix at group(=event) level
+#' Bootstrap stability analysis of flexmix models at event level
+#'
+#' Event-level adaptation of \code{flexclust::bootFlexclust()} for
+#' \code{flexmix} models: for each bootstrap replicate, two samples of
+#' whole events are drawn with replacement, \code{stepFlexmix()} is fitted
+#' to each, both fitted models predict cluster memberships for the full
+#' (unnested, filtered) data set, and the agreement of the two partitions
+#' is quantified via the (Adjusted) Rand Index. Since EM solutions can
+#' converge to fewer components than requested, replicates are matched by
+#' the number of components actually used (choosing the model with the
+#' lowest ICL among duplicates); unmatched \code{k} values yield \code{NA}.
+#' @param x event-level data set (tibble with one row per event and a
+#'        nested \code{precipitation} column)
+#' @param k numeric vector of numbers of components to be tested
+#' @param formula flexmix model formula, e.g. \code{y ~ x | id} for
+#'        event-grouped observations
+#' @param model flexmix driver, e.g. \code{FLXMRglm(..., family = "Gamma")}
+#'        for clusterwise Gamma regression
+#' @param filter lower threshold; unnested precipitation values must
+#'        exceed it to enter the fit (default 0)
+#' @param nboot number of bootstrap replicates (default 100)
+#' @param correct logical; use the Adjusted (\code{TRUE}, default) or raw
+#'        (\code{FALSE}) Rand Index
+#' @param seed optional random seed
+#' @param multicore logical, or a cluster object; see \code{\link{MClapply}}
+#' @param mc.cores number of cores used by \code{\link{MClapply}} (default 2)
+#' @param verbose print progress every 10 replicates? (default \code{FALSE})
+#' @param ... further arguments passed to \code{flexmix::stepFlexmix()},
+#'        e.g. \code{control = list(iter.max = 100)}
+#' @return a list with elements \code{k} (tested values),
+#'         \code{posteriors1}/\code{posteriors2},
+#'         \code{cluster1}/\code{cluster2},
+#'         \code{components1}/\code{components2},
+#'         \code{index1}/\code{index2} (bootstrap indices),
+#'         \code{rand} (nboot x length(k) matrix of (A)RI values),
+#'         \code{total_ks_actuallyUsed} (frequency of the component counts
+#'         the EM algorithm converged to), \code{error} (error messages of
+#'         failed replicates, else \code{NA}), and \code{call}
+#' @examples
+#' \dontrun{
+#' # `scaled` as prepared in inst/scripts/005_clusterwise_regression.R
+#' frm <- as.formula(precipitation + 10 ~ -1 + (log(magnitude + 0.01) +
+#'                   log(duration + 0.01) + time_to_peak) * flash)
+#' stabAn <- scaled[["30"]] |>
+#'   bootEventmix(k = 2:8, formula = y ~ x | id,
+#'                filter = 0,
+#'                model = FLXMRglm(frm, family = "Gamma"),
+#'                control = list(iter.max = 100),
+#'                nboot = 5, # 100 in the paper; computationally heavy
+#'                multicore = FALSE)
+#' }
 bootEventmix <- function(x, k, formula=x~1, model=FLXMCnorm1(), filter=0,
                          nboot = 100, correct = TRUE, seed = NULL, multicore = TRUE,
                          mc.cores = 2, verbose = FALSE, ...) {
@@ -110,13 +170,13 @@ bootEventmix <- function(x, k, formula=x~1, model=FLXMCnorm1(), filter=0,
       ks <- dplyr::full_join(ks[[1]], ks[[2]], by='k',
                              suffix=paste0('_', 1:2))
       
-      #4) 'stretch' k with NAs #die wieder dazuzutun, ist glaube ich eigentlich unnötig, aber schauen wir später #hi
+      #4) 'stretch' k with NAs
       ks <- rbind(ks, c(NA, setdiff(k, ks$k), NA)) |> 
         dplyr::arrange(k)
       
       success_pairs <- na.omit(ks)
       
-      repeat { #In general, I get that this is some kind of failure of fit check, but what for? Where is it used?
+      repeat { 
         count <- sapply(seq_len(nrow(success_pairs)), function(i) {
           m1 <- getModel(s1, success_pairs$k0_1[i])
           m2 <- getModel(s2, success_pairs$k0_2[i])
@@ -208,7 +268,7 @@ bootEventmix <- function(x, k, formula=x~1, model=FLXMCnorm1(), filter=0,
   comps1 <- lapply(z, \(y) sapply(y$comps1, `[[`, 1))
   comps2 <- lapply(z, \(y) sapply(y$comps2, `[[`, 1))
   
-  #TODO: praktischere Umformung für @posteriors und @components schreiben.
+  #open TODO: write a more practical formulation of @posteriors and @components
   
   post1 <- lapply(z, \(y) {
     scaled <- sapply(y$post1, `[[`, 'scaled')
@@ -248,14 +308,5 @@ bootEventmix <- function(x, k, formula=x~1, model=FLXMCnorm1(), filter=0,
        index1 = index1, index2 = index2,
        rand = rand, total_ks_actuallyUsed = tot_k_counts, error = error,
        call = MYCALL)
-  #die nette print-Methode der definierten Klasse fehlt halt jetzt
-}
-
-if(FALSE) {
-  h <- rename(scaled10$`30`, precipitation = rr) |> #not yet unnested
-    bootEventmix(k=K, formula=y~x|id, filter=0, #here I'd put 1.27/6 (caution, I'm always filtering 'bigger'. Is 1.27/6 written for bigger equal?)
-                 model=FLXMRglm(frm, family='Gamma'),
-                 control=list(iter.max=100),
-                 nboot=5,
-                 multicore=FALSE)
+  #print() methods for the defined S4 classes in flexclust won't work on this
 }

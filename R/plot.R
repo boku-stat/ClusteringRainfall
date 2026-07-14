@@ -15,6 +15,15 @@
 #' @param varlab_color char/hexcode with desired color for the variable labels. Default: "blue"
 #' @param vararrow_color char/hexcode with desired color for the variable arrow. Default: "blue"
 #' @param alpha alpha value of the geom_points. Default: 1
+#' @examples
+#' \dontrun{
+#' # `events`, `clusvars`, and the clustering objects as prepared in
+#' # inst/scripts/006_aggregate_distribution_calc.R
+#' clus <- .get_clusters(part_iet_4_station_30$stepClustResults, k = 3)
+#' plt_famd(events[["30"]][clusvars], clus,
+#'          dims = list(x = 1, y = 2:4),
+#'          title = "Graz Universität, Partitioning clustering, k=3")
+#' }
 plt_famd <- function(dat, clusters, dims=list(x=2:4, y=1),
                      scale_factor=5, title=NULL, subtitle=NULL,
                      varlab_length=NULL, varlab_abbrev_show=TRUE,
@@ -87,14 +96,6 @@ plt_famd <- function(dat, clusters, dims=list(x=2:4, y=1),
       theme_minimal() +
       theme(strip.placement = "outside")
   
-}
-
-if(FALSE) {
-  #Usage
-  plt_famd(dat=x1, clusters=pam_result_k3$clustering)
-  plt_famd(dat=x1, clusters=flx.test@cluster)
-  plt_famd(dat=x1, clusters=flx.gauss@cluster)
-  plt_famd(dat=x1, clusters=m@cluster)
 }
 #Source: adapted from github.com/glaaha/mixrain/R/famd_analysis.R
 
