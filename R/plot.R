@@ -314,7 +314,7 @@ plt_cdf_comp <- function(dat, clus_vec, filt, title=NULL, subtitle=NULL) {
               geom='step') +
     geom_line(data=ecdf,
               aes(x=rr, y=value, col=name)) +
-    facet_wrap(~model, scales='free', dir="rt", #quick dirty hack to get 'P' before 'C'
+    facet_wrap(~model, scales='free', dir="rt", #workaround to get facets 'P' before 'C'
                labeller=as_labeller(labs)) +
     scale_color_manual(
       name = 'Distribution',

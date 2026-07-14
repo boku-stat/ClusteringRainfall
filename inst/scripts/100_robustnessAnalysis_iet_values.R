@@ -28,7 +28,7 @@ library(flexmix)
 library(parallel)
 library(rmarkdown)
 library(philentropy)
-devtools::load_all() #alternatively, source(...) #TODO: add relevant function script paths here
+devtools::load_all() #required (instead of source()), so that all functions are loaded in the correct namespace
 
 ################################################################################
 # SETUP
@@ -60,7 +60,7 @@ REGRESSION_FORMULA <- as.formula(
   precipitation + 10 ~ -1 + (log(magnitude+0.01) + log(duration+0.01) +
                               time_to_peak)*flash
 )
-FILTER_VALUES <- 0 #TODO (note to self): Only ran for filt0
+FILTER_VALUES <- 0 #in exploratory analyses, we also applied filter: 0.21. In the actual analyses, filter has always been 0
 # Computational settings
 N_CORES <- max(1, floor(parallel::detectCores() * 0.8))
 N_BOOTSTRAP <- 100  # reduce for faster testing, 100+ for production
@@ -81,17 +81,11 @@ PATHS$RAW_TS <- "data/raw_ts/"
 PATHS$EVENTS_COMBINED <- "data/events_combined/"
 PATHS$RESULTS <- "data/clusres/"
 PATHS$REPORTS <- "inst/reports/"
-#TODO: check whether I need all of those
-# Create directories if they don't exist
 for (path in PATHS) {
   if (grepl("/$", path) & !dir.exists(path)) {
     dir.create(path, recursive = TRUE)
   }
 }
-
-IET_VALUES <- c(3, 6, 12, 18, 24)
-PATHS$EVENTS_COMBINED <- 'data/events_combined/'
-PATHS$RESULTS <- 'data/clusres/'
 CHOSEN_Ks <- NULL #NULL --> reports use IET=4h as a starting default. Rerun step6_generate_report() after inspecting the ARI plots with visually chosen ks, f.i. c(part30=3, part171=3, mod30=2, mod171=4)
 
 
@@ -119,7 +113,7 @@ step1_download_station_data <- function(ids) {
   ### Download data for the selected stations (Dornbirn=171; Bad Mitterndorf=10; Graz=30)
   stations <- stations %>% filter(id %in% ids)
   
-  write_csv(stations[c("id", "name", "state", "lon", "lat", "altitude")], "data/selected_stations_metadata.csv")
+  write_csv(stations[c("id", "name", "state", "lon", "lat", "altitude")], PATHS$STATION_METADATA)
   
   # Start of each time series can be set to 2009
   stations <- stations %>% mutate(start = "2009-01-01T00:00:00")
@@ -380,7 +374,7 @@ step6_generate_report <- function(iet) {
   })
 }
 
-#Usage: step6_generate_report(iet=4) #still not yet fully tested
+#Usage: step6_generate_report(iet=4)
 
 ################################################################################
 # MAIN EXECUTION
