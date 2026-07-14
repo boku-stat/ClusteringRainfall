@@ -21,9 +21,7 @@ stations <- c(171, 30)
 start_seed <- as.numeric(as.Date('2025-09-01'))
 K <- 2:8
 clusvars <- c('severity', 'magnitude', 'duration',
-              'intensity', 'time_to_peak', 'flash') |> 
-  setNames(c('full', 'selected')[c(1,2,2,1,2,2)]) #TODO: this contains code for full and for selected. Show only the selected one in actually shared code
-
+              'intensity', 'time_to_peak', 'flash')
 
 set.seed(start_seed)
 
@@ -39,8 +37,8 @@ events <- paste0(pth_prec,
 scaled <- lapply(events, \(df) {
   mutate(df,
          flash = as.logical(flash),
-         across(all_of(unname(clusvars[1:4])), log),
-         across(all_of(unname(clusvars[1:5])), ~(. - min(.))/diff(range(.)))) |> 
+         across(all_of(clusvars[1:4]), log),
+         across(all_of(clusvars[1:5]), ~(. - min(.))/diff(range(.)))) |> 
     rename(precipitation=rr)
 })
 
@@ -55,10 +53,7 @@ if(!dir.exists(pth_out))
 }
 
 for(station in as.character(stations)) {
-  part <- lapply(list(unname(clusvars),
-                       unname(clusvars[names(clusvars)=='selected'])),
-                  \(y) do_stabAn(scaled[[station]], y, k=K, verbose=TRUE)) |> 
-    setNames(c('selected', 'full')) #TODO: This will simplify if only one set of variables is chosen
+  part <- do_stabAn(scaled[[station]], clusvars, k=K, verbose=TRUE)
   assign(varnames[station], part)
   save(list=varnames[station],
        file=paste0(pth_out, varnames[station],
@@ -70,12 +65,12 @@ for(station in as.character(stations)) {
 ################################################################################
 # all relevant outputs in this script have now been created, but let's look at the results of the stability analyses:
 
-part_iet_4_station_30$full$stepClustResults
-part_iet_4_station_30$full$globalStability |> 
+part_iet_4_station_30$stepClustResults
+part_iet_4_station_30$globalStability |> 
   ggplot(aes(x=k, y=ARI)) + geom_boxplot()
-part_iet_4_station_30$full$segLevelStability$error_msg |> 
+part_iet_4_station_30$segLevelStability$error_msg |> 
   is.na() |> mean() #no errors, good
-part_iet_4_station_30$full$segLevelStability |> 
+part_iet_4_station_30$segLevelStability |> 
   ggplot(aes(x=segment, y=ARI)) +
   geom_boxplot() + facet_wrap(~k, scales='free_x')
 # and the same for the others...

@@ -65,10 +65,10 @@ for(i in clusses) paste0(pth_res, i) |> load()
 
 clusses <- list(
   part30=list(dat=events$`30`,
-              clus_short=.get_clusters(part_iet_4_station_30$full$stepClustResults,
+              clus_short=.get_clusters(part_iet_4_station_30$stepClustResults,
                                        k['part30'])),
   part171=list(dat=events$`171`,
-               clus_short=.get_clusters(part_iet_4_station_171$full$stepClustResults,
+               clus_short=.get_clusters(part_iet_4_station_171$stepClustResults,
                                         k['part171'])),
   mod30=list(dat=events$`30`,
              mod=getModel(mod_iet_4_filt_0_station_30,
