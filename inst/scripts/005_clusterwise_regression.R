@@ -19,7 +19,7 @@ library(flexmix)
 library(parallel)
 devtools::load_all() #used functions: bootEventmix, modified MClapply (in script bootflexmix.R)
 
-pth_prec <- .fix_path('') #TODO: replace this from script with hardcoded filepath in the next repo, data I guess
+pth_prec <- 'data/events_combined'
 iet <- 4
 stations <- c(30, 171)
 start_seed <- as.numeric(as.Date('2025-08-26'))

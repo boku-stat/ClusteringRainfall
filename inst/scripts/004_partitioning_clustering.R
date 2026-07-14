@@ -15,7 +15,7 @@ library(tidyverse)
 library(flexclust)
 devtools::load_all() #used functions: do_stabAn
 
-pth_prec <- .fix_path('') #TODO: replace this from script with hardcoded filepath in the next repo, data I guess
+pth_prec <- 'data/events_combined/'
 iet <- 4
 stations <- c(171, 30)
 start_seed <- as.numeric(as.Date('2025-09-01'))

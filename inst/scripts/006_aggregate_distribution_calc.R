@@ -30,7 +30,7 @@ library(ggpubr)
 library(FactoMineR)
 devtools::load_all() #used functions: .get_clusters, aggregate_dist_calc, .get_KL, plt_famd, plt_dpd_flexmix, plt_ecdf, plt_cdf_comp
 
-pth_prec <- .fix_path('') #TODO: replace this from script with hardcoded filepath in the next repo, data I guess
+pth_prec <- 'data/events_combined/'
 pth_res <- 'data/clusres'
 iet <- 4
 stations <- c(30, 171)
