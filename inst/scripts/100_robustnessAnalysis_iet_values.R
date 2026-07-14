@@ -2,14 +2,15 @@
 ######################## MASTER ANALYSIS SCRIPT ################################
 ################################################################################
 # This script orchestrates the complete analysis pipeline for multiple minimum
-# interevent time (MIT) values.Specifically, it documents our robustness analyses on
+# interevent time (MIT) values. Specifically, it documents our robustness analyses on
 # interevent time values different to our baseline value of 4hrs.
 # We run our robustness analysis on MIT (also called "IET" in some parts of the code)
 # values of 3, 6, 12, 18 and 24hrs.
 #
 # The script runs, for each MIT value:
 #   1. Precipitation data download (note that flash data is behind a paywall and must
-#      thus be procured and downloaded in a separate application step.)
+#      thus be procured and downloaded in a separate application step. -- However, we
+#      do provide the derived flash counts for stations 30 and 171 with this repo.)
 #   2. Data preparation (flash + precipitation)
 #   3. Partitioning clustering with stability analysis
 #   4. Clusterwise regression with stability analysis
@@ -88,14 +89,11 @@ for (path in PATHS) {
   }
 }
 
-#******
-#hiiiiiii - for the reports, change afterwards
-IET_VALUES <- 3
-PATHS$EVENTS_COMBINED <- '/media/nwnr/Projekte/EROSA-Stat/Tawes_stations/data/events_combined/'
-PATHS$RESULTS <- '/media/nwnr/Projekte/EROSA-Stat/Tawes_stations/data/clusres/'
-CHOSEN_Ks <- c(3, 3, 2, 2) |> 
-  setNames(c('part171', 'part30', 'mod171', 'mod30'))
-#
+IET_VALUES <- c(3, 6, 12, 18, 24)
+PATHS$EVENTS_COMBINED <- 'data/events_combined/'
+PATHS$RESULTS <- 'data/clusres/'
+CHOSEN_Ks <- NULL #NULL --> reports use IET=4h as a starting default. Rerun step6_generate_report() after inspecting the ARI plots with visually chosen ks, f.i. c(part30=3, part171=3, mod30=2, mod171=4)
+
 
 ################################################################################
 # STEP 1: DOWNLOAD PRECIPITATION TIME SERIES DATA
@@ -334,9 +332,8 @@ step5_clusterwise_regression <- function(iet) {
                     mc.cores = N_CORES)
       
     stabname <- paste0(varnames[i], '_stabAn')
-    results[[stabname]] <- stabAn
-      
     fname_out <- sprintf("%s%s.RDA", PATHS$RESULTS, stabname)
+    
     save(list = "stabAn", file = fname_out)
     
   }
