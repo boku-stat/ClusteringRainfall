@@ -13,6 +13,8 @@ This repository is organized to "work like an `R` package", that is to say we fo
 
 Note that function documentations are written in `roxygen2` syntax. This means that you can create minimalistic help pages (stored in a `man/` folder) to them by running `roxygen2::roxygenise()` or `devtools::document()` from within this repository.
 
+`sessionInfo()` information for package versions used for the analysis are recorded in `sessionInfo.txt`.
+
 ## How to use this repository
 
  1. Clone, or download and unzip.
