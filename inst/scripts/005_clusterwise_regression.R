@@ -17,7 +17,7 @@ library(tidyverse)
 library(flexclust)
 library(flexmix)
 library(parallel)
-devtools::load_all() #used functions: bootEventmix, modified MClapply (in script bootflexmix.R)
+devtools::load_all() #used functions: bootEventmix, modified MClapply (in script bootEventmix.R)
 
 pth_prec <- 'data/events_combined/'
 iet <- 4

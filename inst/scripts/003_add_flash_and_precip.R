@@ -65,5 +65,3 @@ lapply(fl_events, combine_data,
        path_out = path_out,
        fname_flash=fl_flash,
        fname_precip=fl_raw)
-
-#caution, moved the functions, check

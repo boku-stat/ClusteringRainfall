@@ -15,6 +15,7 @@
 #' @param varlab_color char/hexcode with desired color for the variable labels. Default: "blue"
 #' @param vararrow_color char/hexcode with desired color for the variable arrow. Default: "blue"
 #' @param alpha alpha value of the geom_points. Default: 1
+#' @param return_famd shall the famd object be returned, too (in addition to the plot)? Default: FALSE
 #' @examples
 #' \dontrun{
 #' # `events`, `clusvars`, and the clustering objects as prepared in
@@ -28,7 +29,8 @@ plt_famd <- function(dat, clusters, dims=list(x=2:4, y=1),
                      scale_factor=5, title=NULL, subtitle=NULL,
                      varlab_length=NULL, varlab_abbrev_show=TRUE,
                      varlab_size=3.5, varlab_nudge=1.1,
-                     varlab_color='blue', vararrow_color='blue', alpha=1){
+                     varlab_color='blue', vararrow_color='blue', alpha=1,
+                     return_famd=FALSE){
   # Factorize flash if that hasn't been done yet
   if(!is.factor(dat$flash)) dat$flash <- factor(dat$flash)
   dim <- lapply(dims, \(d) sprintf("Dim.%d", d))
@@ -77,7 +79,7 @@ plt_famd <- function(dat, clusters, dims=list(x=2:4, y=1),
       setNames(dim[[d]])
   }, simplify = FALSE)
 
-    ggplot() +
+    plt <- ggplot() +
       geom_point(data = ind_coords,
                  aes(x=values_x, y=values_y,
                      color=cluster, shape=flash), size=2, alpha=alpha) +
@@ -96,6 +98,12 @@ plt_famd <- function(dat, clusters, dims=list(x=2:4, y=1),
       theme_minimal() +
       theme(strip.placement = "outside")
   
+    if(return_famd) {
+      list(
+        famd = famd_result,
+        plot = plt
+      )
+    } else { plt }
 }
 
 
@@ -172,10 +180,21 @@ plt_dpd_flexmix <- function(model, eval_vars,
   }, simplify = FALSE) |> 
     bind_rows(.id="effect")
   
+  k <- max(df$cluster)
+  
   lbl <- function(x) {
     gsub("_", " ", x) |> 
       str_to_title()
   }
+  
+  pal <- c(
+    scales::hue_pal()(3),
+    scales::hue_pal()(8)[c(7, 8, 5)]
+  )
+  if(length(pal)<k) {
+    pal <- scales::hue_pal()(k)
+  }
+  pal <- pal[1:k] |> setNames(1:k)
   
   ggplot(df, aes(x=value, y=predictions - 10,
                  col=as.factor(cluster),
