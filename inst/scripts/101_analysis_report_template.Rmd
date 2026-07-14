@@ -183,7 +183,7 @@ if(is.null(chosen_ks)) {
 }
 
 part <- sapply(parts, \(mdl) {
-  partres <- part[[mdl]]$stepClustResult
+  partres <- part[[mdl]]$stepClustResults
   stn <- str_extract(mdl, "\\d+$")
   clus_short <- .get_clusters(partres,
                               chosen_ks[paste0("part", stn)])
