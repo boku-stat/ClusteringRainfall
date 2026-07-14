@@ -34,7 +34,7 @@ iet <- c(3,4,6,12,18,24)
 # Run this full setup only on an appropriate computing setup.
 for(i in iet)
 {
-  lapply(fl, get_events, path_out = path_out, th_init = 0.2, nh = i, 
+  lapply(fl, get_events, df = df, path_out = path_out, th_init = 0.2, nh = i, 
          th_sum = 1.27)
 }
 #--------------------------
